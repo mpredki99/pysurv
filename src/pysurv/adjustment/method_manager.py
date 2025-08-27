@@ -63,7 +63,7 @@ class MethodManager(AdjustmentMethodManager):
     def _get_solver_res_var(self, type: str):
         res_var = {
             "obs": self._solver.residual_variance,
-            "free": self._solver.coord_cor_variance,
+            "free": self._solver.coord_correction_variance,
         }
         return res_var.get(type)
 
