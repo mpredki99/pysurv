@@ -45,6 +45,8 @@ class AdjustmentMatrices(ABC):
         self._R = None
         self._sX = None
 
+        self._n = None
+        self._u = None
         self._k = None
 
         self._xyw_sw_init_strategy = get_strategy(
@@ -154,6 +156,18 @@ class AdjustmentMatrices(ABC):
         if self._k is None:
             self._refresh_degrees_of_freedom()
         return self._k
+
+    @property
+    def n_measuremetns(self):
+        if self._n is None:
+            self._n, self._u = self.matrix_X.shape
+        return self._n
+
+    @property
+    def n_unknowns(self):
+        if self._u is None:
+            self._n, self._u = self.matrix_X.shape
+        return self._u
 
     def _get_matrix_x_indexer(self):
         """Return IndexerMatrixX object."""
