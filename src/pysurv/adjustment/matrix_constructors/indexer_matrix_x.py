@@ -33,6 +33,16 @@ class IndexerMatrixX:
         return self._map_coordinate_index()
 
     @cached_property
+    def coordinate_mask(self) -> pd.DataFrame:
+        """Return a DataFrame mask that shows if coordinate index is valid value."""
+        return self.coordinate_indices != INVALID_INDEX
+
+    @cached_property
+    def filtered_coordinate_indices(self) -> pd.DataFrame:
+        """Return a coordinate_indices slice that contains only valid indices."""
+        return self.coordinate_indices[self.coordinate_mask]
+
+    @cached_property
     def orientation_indices(self) -> pd.Series:
         """Return a Series mapping station orientations to their columns in matrix X."""
         if "orientation" not in self._stations.columns:
@@ -40,6 +50,20 @@ class IndexerMatrixX:
 
         if self.coordinate_indices is not None:
             return self._map_orientation_index()
+
+    @cached_property
+    def orientation_mask(self) -> pd.DataFrame:
+        """Return a DataFrame mask that shows if orienatation index is valid value."""
+        if self.orientation_indices is None:
+            return
+        return self.orientation_indices != INVALID_INDEX
+
+    @cached_property
+    def filtered_orientation_indices(self) -> pd.DataFrame:
+        """Return a orientation_indices slice that contains only valid indices."""
+        if self.orientation_indices is None:
+            return
+        return self.orientation_indices[self.orientation_mask]
 
     def _map_coordinate_index(self) -> None:
         """Map control point coordinates to their corresponding column indices in matrix X."""
