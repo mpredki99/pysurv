@@ -48,6 +48,7 @@ class Adjustment:
             config_solver_index=config_solver_index,
             create_list_of_variances=create_list_of_variances,
         )
+        self._results = None
         self._report = None
 
     @property
@@ -67,8 +68,12 @@ class Adjustment:
         return self._dataset
 
     @property
+    def results(self):
+        return self._solver.results
+
+    @property
     def report(self):
         """Return the adjustment report."""
-        if self._solver.results is not None:
-            self._report = Report(self._dataset, self._solver.results)
+        if self.results is not None:
+            self._report = Report(self._solver.results)
         return self._report

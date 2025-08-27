@@ -85,8 +85,8 @@ def test_run(adjustment_test_matrices: AdjustmentMatrices) -> None:
     """Test that iteration runs properly."""
     iteration = DenseIteration(adjustment_test_matrices)
 
-    assert iteration.counter == 0
+    assert iteration.current == 0
 
     iteration.run()
 
-    assert iteration.counter == 1
+    assert iteration.current == 1

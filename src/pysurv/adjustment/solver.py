@@ -9,168 +9,91 @@ from functools import cached_property
 from warnings import warn
 
 import numpy as np
-import pandas as pd
 
+from pysurv.utils.utils import reset_object_cache
 from pysurv.warnings._warnings import InvalidVarianceWarning
 
 from .adjustment_solver import AdjustmentSolver
+from .dense_iteration import DenseIteration
+from .results import Results
 
 
 class Solver(AdjustmentSolver):
     """Class for solving surveying adjustment task."""
-    @property
-    def n_iter(self):
-        return self._iteration.counter
 
     @cached_property
-    def matrix_G(self):
-        if self._iteration.matrix_G is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.matrix_G,
-            index=self._matrix_index,
-            columns=self._matrix_index,
-        )
+    def residual_variances(self):
+        if not self._residual_variances:
+            return self.residual_variance
+        return np.array(self._residual_variances)
 
     @cached_property
-    def inv_matrix_G(self):
-        """Return inverse of G matrix."""
-        if self._iteration.inv_matrix_G is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.inv_matrix_G,
-            index=self._matrix_index,
-            columns=self._matrix_index,
-        )
-
-    @cached_property
-    def cross_product(self):
-        """Rerurn cross product"""
-        if self._iteration.cross_product is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.cross_product,
-            index=self._matrix_index,
-            columns=["cross_product"],
-        )
-
-    @cached_property
-    def increments(self):
-        """Return increments."""
-        if self._iteration.increments is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.increments, index=self._matrix_index, columns=["increments"]
-        )
-
-    @cached_property
-    def coord_increments(self):
-        """Return fitered for just coordinate increments."""
-        if self._iteration.coord_increments is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.coord_increments,
-            index=self._matrix_coord_index,
-            columns=["coord_increments"],
-        )
-
-    @cached_property
-    def increment_matrix(self):
-        """Return increment matrix."""
-        if self._iteration.increment_matrix is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.increment_matrix,
-            index=self._controls.index,
-            columns=self._controls.coordinate_columns,
-        )
-
-    @cached_property
-    def obs_residuals(self):
-        """Return observation residuals."""
-        if self._iteration.obs_residuals is None:
-            return
-
-        return pd.DataFrame(
-            data=self._iteration.obs_residuals,
-            index=self._obs_index,
-            columns=["obs_residuals"],
-        )
-
-    @property
-    def residual_variance(self):
-        return self._iteration.residual_variance
-
-    @cached_property
-    def covariance_X(self):
-        """Return the covariance matrix of X."""
-        if self._iteration.covariance_X is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.covariance_X,
-            index=self._matrix_index,
-            columns=self._matrix_index,
-        )
-
-    @cached_property
-    def covariance_Y(self):
-        """Return the covariance matrix of Y."""
-        if self._iteration.covariance_Y is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.covariance_Y, index=self._obs_index, columns=self._obs_index
-        )
-
-    @cached_property
-    def covariance_r(self):
-        """Return the covariance matrix of residuals."""
-        if self._iteration.covariance_r is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.covariance_r, index=self._obs_index, columns=self._obs_index
-        )
-
-    @cached_property
-    def coordinate_weights(self):
-        """Return the point weights."""
-        if self._iteration.coordinate_weights is None:
-            return
-
-        return pd.DataFrame(
-            self._iteration.coordinate_weights,
-            index=self._get_matrix_coord_index(),
-            columns=["coordinate_weights"],
-        )
-
-    @property
-    def n_movable_tie_points(self):
-        return self._n_movable_tie_points
-
-    @cached_property
-    def coord_cor_variance(self):
+    def coord_correction_variance(self) -> np.ndarray:
+        """Return coordinate corrections variance."""
         if not self._iteration:
+            return
+        return self._get_coord_corrections_variance()
+
+    @cached_property
+    def coord_correction_variances(self) -> np.ndarray:
+        if not self._coord_correction_variances:
+            return self.coord_correction_variance
+        return np.array(self._coord_correction_variances)
+
+    @cached_property
+    def residual_sigma(self) -> np.ndarray | None:
+        """Return value of residual sigma."""
+        if self.residual_variance is None:
+            return
+        return np.sqrt(self.residual_variance)
+
+    @cached_property
+    def residual_sigmas(self) -> np.ndarray | None:
+        if self.residual_variances is None:
             return None
-
-        if self._coord_corrections_variances:
-            return self._coord_corrections_variances[-1]
-        else:
-            return self._get_coord_corrections_variance()
+        return np.sqrt(self.residual_variances)
 
     @cached_property
-    def coord_corrections(self):
-        return self._controls.coordinates - self._approx_coordinates
+    def coord_correction_sigma(self) -> float | None:
+        """Return value of coordinate corrections sigma."""
+        if self.coord_correction_variance is None:
+            return
+        return np.sqrt(self.coord_correction_variance)
 
     @cached_property
-    def svd_converge(self):
+    def coord_correction_sigmas(self) -> np.ndarray | None:
+        if self.coord_correction_variances is None:
+            return
+        return np.sqrt(self.residual_variances)
+
+    @cached_property
+    def coord_corrections(self) -> np.ndarray:
+        """Return value of coordinate corrections."""
+        return (self._controls.coordinates - self._approx_coordinates).values
+
+    @cached_property
+    def normalized_residuals(self) -> np.ndarray:
+        """Return normalized residuals."""
+        obs_residuals = self._iteration.obs_residuals.reshape(-1)
+        obs_residuals_var = self._iteration.covariance_r.diagonal()
+        return self._normalize_residuals(obs_residuals, obs_residuals_var)
+
+    @cached_property
+    def normalized_corrections(self) -> np.ndarray:
+        """Return normalized correction values"""
+        corrections = self.coord_corrections.reshape(-1)[self._iteration._coord_idx]
+        corrections_var = self._iteration.covariance_X.diagonal()[
+            self._iteration._coord_idx
+        ]
+        normalized = np.full_like(corrections, np.nan)
+        normalized[self._iteration._coord_idx] = self._normalize_residuals(
+            corrections, corrections_var
+        )
+        return normalized
+
+    @cached_property
+    def svd_converge(self) -> bool:
+        """Return SVD convergence status."""
         return self._iteration.run()
 
     def solve(self):
@@ -226,7 +149,7 @@ class Solver(AdjustmentSolver):
         invalid = var_v[var_v < 0]
         if invalid.size > 0:
             warn(
-                f"{invalid.size} negative variances occured in {self.n_iter}. iteration: {invalid}.",
+                f"{invalid.size} negative variances occured in {self.current_iter}. iteration: {invalid}.",
                 InvalidVarianceWarning,
             )
             var_v = np.clip(var_v, a_min=0, a_max=None)
@@ -239,7 +162,7 @@ class Solver(AdjustmentSolver):
 
     def _process_successful_iteration(self):
         """Process the results of a successful iteration."""
-        self._reset_cache()
+        reset_object_cache(self)
         self._update_controls()
         if self._create_list_of_variances:
             self._append_residual_variances()
@@ -260,7 +183,7 @@ class Solver(AdjustmentSolver):
     def _append_residual_variances(self):
         """Append current residual and coordinate correction variances."""
         self._residual_variances.append(self.residual_variance)
-        self._coord_corrections_variances.append(self.coord_cor_variance)
+        self._coord_correction_variances.append(self.coord_correction_variance)
 
     def _check_condition(self):
         """Check if iteration should stop or continue."""
@@ -270,7 +193,7 @@ class Solver(AdjustmentSolver):
 
     def _is_max_iter_exceeded(self):
         """Check if current iteration number is less than max in config."""
-        return self._iteration._counter >= self._config_solver.max_iter
+        return self._iteration._current >= self._config_solver.max_iter
 
     def _is_increments_within_threshold(self):
         """Check if all increments are less than threshold in config."""
@@ -285,7 +208,7 @@ class Solver(AdjustmentSolver):
     def _calculate_coord_coorections_variance(self):
         """Calculate variance of coordinate corrections."""
         point_weights = self._iteration.coordinate_weights
-        coord_corrections = self.coord_corrections.values.reshape(-1)
+        coord_corrections = self.coord_corrections.reshape(-1)
 
         if point_weights is not None:
             squared_corrections = (coord_corrections**2 * point_weights).sum()
@@ -294,89 +217,46 @@ class Solver(AdjustmentSolver):
 
         return np.divide(squared_corrections, self._n_movable_tie_points)
 
-    def _prepare_svd_converge(self):
-        if self.svd_converge:
-            return "Calculations succeed."
-        return "Calculations aborted due to SVD did not converge."
+    def _get_n_movable_tie_points(self) -> int:
+        """Get number of movable reference points."""
+        if self._matrices.matrix_sW is None:
+            return self._count_movable_tie_points_from_indexer()
+        return self._count_movable_tie_points_from_sw()
 
-    def _prepare_inner_constraints(self):
-        if self.matrices.methods.free_adjustment == "ordinary":
-            return ["pseudoinverse"]
-        return self.matrices.inner_constraints
+    def _count_movable_tie_points_from_indexer(self) -> int:
+        """
+        Count how many tie points are movable based on indexer object. If sW matrix is None
+        (ordinary free adjustment), than all control points are movable tie points.
+        """
+        return self._matrices.indexer.coordinate_indices.max().max() + 1
 
-    def _prepare_residual_sigma(self):
-        if self._create_list_of_variances:
-            residual_variances = np.array(self._residual_variances)
-            return np.sqrt(residual_variances)
-        return np.sqrt(self.residual_variance)
+    def _count_movable_tie_points_from_sw(self) -> int:
+        """
+        Count how many tie points are movable based on control point weight matrix.
+        If sW matrix is not None, than tie control points have non-zero weights.
+        Control points with zero weights are not tie points.
+        """
+        sW = self._matrices.matrix_sW
+        return sW.diagonal()[sW.diagonal() > 0].size
 
-    def _prepare_coord_correction_sigma(self):
-        if self._create_list_of_variances:
-            coord_corrections_variances = np.array(self._coord_corrections_variances)
-            return np.sqrt(coord_corrections_variances)
-        return np.sqrt(self._get_coord_corrections_variance())
+    def _get_n_fixed_tie_points(self) -> int:
+        """Return number of fixed tie points."""
+        return self._controls.coordinates.count().sum() - self._n_movable_tie_points
 
-    def _prepare_normalized_residuals(self):
-        obs_residuals = self._iteration.obs_residuals.reshape(-1)
-        obs_residuals_var = self._iteration.covariance_r.diagonal()
+    def _get_residual_variances(self):
+        return []
 
-        return self._normalize_residuals(obs_residuals, obs_residuals_var)
+    def _get_coord_correction_variances(self):
+        return []
 
-    def _prepare_normalized_corrections(self):
-        import pandas as pd
+    def _get_adjustment_iteration(self) -> DenseIteration:
+        """Returns iteration object."""
+        return DenseIteration(self._matrices)
 
-        corrections = self.coord_corrections.values.reshape(-1)[
-            self._iteration._coord_idx
-        ]
-        corrections_var = self._iteration.covariance_X.diagonal()[
-            self._iteration._coord_idx
-        ]
+    def _get_adjustment_results(self) -> Results:
+        return Results(self)
 
-        normalized = np.full_like(corrections, np.nan)
-
-        normalized[self._iteration._coord_idx] = self._normalize_residuals(
-            corrections, corrections_var
-        )
-
-        return pd.DataFrame(
-            normalized.reshape(self.coord_corrections.shape),
-            index=self.coord_corrections.index,
-            columns=self.coord_corrections.columns,
-        )
-
-    def _prepare_adjustment_results(self):
-        """Prepare and store adjustment results."""
-        n_measurements, n_unknowns = self.matrices.matrix_X.shape
-
-        self._results = {
-            "n_iter": self.n_iter,
-            "obs_adj_method": self.methods.obs_adj,
-            "obs_tuning_constants": self.methods.obs_tuning_constants,
-            "free_adj_method": self.methods.free_adjustment,
-            "free_adj_tuning_constants": self.methods.free_adj_tuning_constants,
-            "n_measurements": n_measurements,
-            "n_coord_corrections": self.coord_corrections.size,
-            "n_unknowns": n_unknowns,
-            "n_movable_tie_points": self.n_movable_tie_points,
-            "degrees_of_freedom": self.matrices.degrees_of_freedom,
-            "inner_constraints": self._prepare_inner_constraints(),
-            "obs_residuals": self.obs_residuals,
-            "norm_residuals": self._prepare_normalized_residuals(),
-            "residual_sigma": self._prepare_residual_sigma(),
-            "coord_correction_sigma": self._prepare_coord_correction_sigma(),
-            "approximate_coordinates": self._approx_coordinates,
-            "adjusted_coordinates": self._controls.coordinates,
-            "coordinate_corrections": self.coord_corrections,
-            "norm_corrections": self._prepare_normalized_corrections(),
-            "cov_X": self.covariance_X,
-            "cov_Y": self.covariance_Y,
-            "cov_r": self.covariance_r,
-            "SVD_converge": self._prepare_svd_converge(),
-        }
-
-    def _reset_cache(self):
-        """Reset cached properties values."""
-        for name in dir(self.__class__):
-            attr = getattr(self.__class__, name)
-            if isinstance(attr, cached_property) and name in self.__dict__:
-                del self.__dict__[name]
+    def _get_n_coord_corrections(self) -> int | None:
+        if self.coord_corrections is None:
+            return
+        return self.coord_corrections.size

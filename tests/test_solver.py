@@ -15,7 +15,7 @@ def test_prepare_results(
     """Test that beofre start calculations results are not generated."""
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.n_iter == 0
+    assert solver.current_iter == 0
     assert solver.results is None
 
 
@@ -27,7 +27,7 @@ def test_iterate(
 
     solver.iterate()
 
-    assert solver.n_iter == 1
+    assert solver.current_iter == 1
     assert solver.results is not None
 
 
@@ -43,8 +43,8 @@ def test_solve_observation_ordinary(
 
     solver.solve()
 
-    assert solver.results.get("obs_adj_method") == "ordinary"
-    assert solver.results.get("inner_constraints") is None
+    assert solver.results.methods.obs_adj == "ordinary"
+    assert solver.results.inner_constraints is None
     assert solver.results is not None
 
 
@@ -60,8 +60,8 @@ def test_solve_observation_weighted(
 
     solver.solve()
 
-    assert solver.results.get("obs_adj_method") == "weighted"
-    assert solver.results.get("inner_constraints") is None
+    assert solver.results.methods.obs_adj == "weighted"
+    assert solver.results.inner_constraints is None
     assert solver.results is not None
 
 
@@ -77,8 +77,8 @@ def test_solve_observation_robust(
 
     solver.solve()
 
-    assert solver.results.get("obs_adj_method") == "huber"
-    assert solver.results.get("inner_constraints") is None
+    assert solver.results.methods.obs_adj == "huber"
+    assert solver.results.inner_constraints is None
     assert solver.results is not None
 
 
@@ -94,8 +94,8 @@ def test_solve_free_adj_ordinary(
 
     solver.solve()
 
-    assert solver.results.get("free_adj_method") == "ordinary"
-    assert solver.results.get("inner_constraints") == ["pseudoinverse"]
+    assert solver.results.methods.free_adjustment == "ordinary"
+    assert solver.results.inner_constraints == ["pseudoinverse"]
     assert solver.results is not None
 
 
@@ -111,8 +111,8 @@ def test_solve_free_adj_weighted(
 
     solver.solve()
 
-    assert solver.results.get("free_adj_method") == "weighted"
-    assert solver.results.get("inner_constraints") is not None
+    assert solver.results.methods.free_adjustment == "weighted"
+    assert solver.results.inner_constraints is not None
     assert solver.results is not None
 
 
@@ -128,6 +128,6 @@ def test_solve_free_adj_robust(
 
     solver.solve()
 
-    assert solver.results.get("free_adj_method") == "huber"
-    assert solver.results.get("inner_constraints") is not None
+    assert solver.results.methods.free_adjustment == "huber"
+    assert solver.results.inner_constraints is not None
     assert solver.results is not None

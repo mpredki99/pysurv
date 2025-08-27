@@ -6,13 +6,15 @@
 
 from abc import ABC, abstractmethod
 
-from ._constants import INVALID_INDEX
+import numpy as np
 import pandas as pd
 
-from .adjustment_matrices import AdjustmentMatrices
-from .config_solver import config_solver
-from .dense_iteration import DenseIteration
+from pysurv.utils.utils import reset_object_cache
+
 from .adjustment_iteration import AdjustmentIteration
+from .adjustment_matrices import AdjustmentMatrices
+from .adjustment_results import AdjustmentResults
+from .config_solver import config_solver
 
 
 class AdjustmentSolver(ABC):
@@ -22,26 +24,36 @@ class AdjustmentSolver(ABC):
         config_solver_index: str | None = None,
         create_list_of_variances: bool = False,
     ) -> None:
+        self._config_solver = self._get_config_solver(config_solver_index)
         self._matrices = matrices
         self._controls = self.dataset.controls
         self._approx_coordinates = self._controls.coordinates.copy()
         self._create_list_of_variances = create_list_of_variances
-        self._residual_variances = []
-        self._coord_corrections_variances = []
-        self._n_movable_tie_points = self._get_n_movable_tie_points()
-        self._config_solver = self._get_config_solver(config_solver_index)
-        self._results = None
-        
-        self._obs_index = self._get_obs_index()
-        self._matrix_coord_index = self._get_matrix_coord_index()
-        self._matrix_index = self._get_matrix_index()
 
-        self._iteration = self._get_lsq_iteration()
+        self._n_coord_corrections = None
+        self._n_movable_tie_points = self._get_n_movable_tie_points()
+        self._n_fixed_tie_points = self._get_n_fixed_tie_points()
+        self._residual_variances = self._get_residual_variances()
+        self._coord_correction_variances = self._get_coord_correction_variances()
+
+        self._iteration = self._get_adjustment_iteration()
+        self._results = self._get_adjustment_results()
+
         self._matrices.methods._inject_solver(self)
 
     @property
+    def results(self):
+        """Prepare if needed and return adjustment results."""
+        if self.current_iter == 0:
+            return None
+
+        if self.current_iter > self._results.n_iter:
+            reset_object_cache(self._results)
+        return self._results
+
+    @property
     def matrices(self):
-        """Return LSQ matrices."""
+        """Return adjustment matrices object."""
         return self._matrices
 
     @property
@@ -53,100 +65,137 @@ class AdjustmentSolver(ABC):
         return self._matrices.dataset
 
     @property
-    def results(self):
-        """Prepare if needed and return adjustment results."""
-        if self._results is None and self._iteration:
-            self._prepare_adjustment_results()
-        return self._results
+    def approx_coordinates(self) -> pd.DataFrame:
+        """Return initial approximate coordinate values."""
+        return self._approx_coordinates
 
     @property
-    @abstractmethod
-    def n_iter(self):
-        pass
+    def current_iter(self):
+        return self._iteration.current
 
     @property
-    @abstractmethod
     def matrix_G(self):
-        pass
+        return self._iteration.matrix_G
 
     @property
-    @abstractmethod
     def inv_matrix_G(self):
         """Return inverse of G matrix."""
-        pass
+        return self._iteration.inv_matrix_G
 
     @property
-    @abstractmethod
     def cross_product(self):
         """Rerurn cross product"""
-        pass
+        return self._iteration.cross_product
 
     @property
-    @abstractmethod
-    def increments(self):
-        """Return increments."""
-        pass
-
-    @property
-    @abstractmethod
-    def coord_increments(self):
-        """Return fitered for just coordinate increments."""
-        pass
-
-    @property
-    @abstractmethod
-    def increment_matrix(self):
-        """Return increment matrix."""
-        pass
-
-    @property
-    @abstractmethod
-    def obs_residuals(self):
-        """Return observation residuals."""
-        pass
-
-    @property
-    @abstractmethod
-    def residual_variance(self):
-        pass
-
-    @property
-    @abstractmethod
     def covariance_X(self):
         """Return the covariance matrix of X."""
-        pass
+        return self._iteration.covariance_X
 
     @property
-    @abstractmethod
     def covariance_Y(self):
         """Return the covariance matrix of Y."""
-        pass
+        return self._iteration.covariance_Y
 
     @property
-    @abstractmethod
     def covariance_r(self):
         """Return the covariance matrix of residuals."""
-        pass
+        return self._iteration.covariance_r
 
     @property
-    @abstractmethod
+    def increments(self):
+        """Return increments."""
+        return self._iteration.increments
+
+    @property
+    def coord_increments(self):
+        """Return fitered for just coordinate increments."""
+        return self._iteration.coord_increments
+
+    @property
+    def increment_matrix(self):
+        """Return increment matrix."""
+        return self._iteration.increment_matrix
+
+    @property
     def coordinate_weights(self):
         """Return the point weights."""
+        return self._iteration.coordinate_weights
+
+    @property
+    def obs_residuals(self):
+        """Return observation residuals."""
+        return self._iteration.obs_residuals
+
+    @property
+    def n_movable_tie_points(self) -> int:
+        """Return number of movable tie points."""
+        return self._n_movable_tie_points
+
+    @property
+    def n_fixed_tie_points(self) -> int:
+        return self._n_fixed_tie_points
+
+    @property
+    def residual_variance(self):
+        return self._iteration.residual_variance
+
+    @property
+    @abstractmethod
+    def residual_variances(self):
+        pass
+
+    @property
+    def n_coord_corrections(self):
+        if self._n_coord_corrections is None:
+            self._get_n_coord_corrections()
+        return self._n_coord_corrections
+
+    @property
+    @abstractmethod
+    def coord_correction_variance(self):
         pass
 
     @property
     @abstractmethod
-    def n_movable_tie_points(self):
+    def coord_correction_variances(self):
         pass
 
     @property
     @abstractmethod
-    def coord_cor_variance(self):
+    def residual_sigma(self) -> np.ndarray | None:
+        """Return value of residual sigma."""
+        pass
+
+    @property
+    @abstractmethod
+    def residual_sigmas(self) -> np.ndarray | None:
+        pass
+
+    @property
+    @abstractmethod
+    def coord_correction_sigma(self) -> np.ndarray | None:
+        """Return value of coordinate corrections sigma."""
+        pass
+
+    @property
+    @abstractmethod
+    def coord_correction_sigmas(self) -> np.ndarray | None:
         pass
 
     @property
     @abstractmethod
     def coord_corrections(self):
+        pass
+
+    @property
+    @abstractmethod
+    def normalized_residuals(self) -> np.ndarray:
+        pass
+
+    @property
+    @abstractmethod
+    def normalized_corrections(self) -> np.ndarray:
         pass
 
     @property
@@ -170,7 +219,33 @@ class AdjustmentSolver(ABC):
         pass
 
     @abstractmethod
-    def _prepare_adjustment_results(self):
+    def _get_adjustment_iteration(self) -> AdjustmentIteration:
+        """Returns adjustment iteration object."""
+        pass
+
+    @abstractmethod
+    def _get_adjustment_results(self) -> AdjustmentResults:
+        """Returns adjustment results object."""
+        pass
+
+    @abstractmethod
+    def _get_residual_variances(self):
+        pass
+
+    @abstractmethod
+    def _get_coord_correction_variances(self):
+        pass
+
+    @abstractmethod
+    def _get_n_movable_tie_points(self) -> int:
+        pass
+
+    @abstractmethod
+    def _get_n_fixed_tie_points(self) -> int:
+        pass
+
+    @abstractmethod
+    def _get_n_coord_corrections(self):
         pass
 
     def _get_config_solver(self, index: str | None):
@@ -178,65 +253,3 @@ class AdjustmentSolver(ABC):
         if index is None:
             index = config_solver.default_index
         return config_solver[index]
-
-    def _get_n_movable_tie_points(self) -> int:
-        """Get number of movable reference points."""
-        if self._matrices.matrix_sW is None:
-            return self._count_movable_tie_points_from_indexer()
-        return self._count_movable_tie_points_from_sw()
-
-    def _count_movable_tie_points_from_indexer(self) -> int:
-        """
-        Count how many tie points are movable based on indexer object. If sW matrix is None
-        (ordinary free adjustment), than all control points are movable tie points.
-        """
-        return self._matrices.indexer.coordinate_indices.max().max() + 1
-
-    def _count_movable_tie_points_from_sw(self) -> int:
-        """
-        Count how many tie points are movable based on control point weight matrix.
-        If sW matrix is not None, than tie control points have non-zero weights.
-        Control points with zero weights are not tie points.
-        """
-        sW = self._matrices.matrix_sW
-        return sW.diagonal()[sW.diagonal() > 0].size
-    
-    def _get_obs_index(self) -> pd.MultiIndex:
-        """Return multiindex object to describe observation adjustment results."""
-        measurements = self.dataset.measurements
-
-        index = measurements.stack(future_stack=True).index
-        names = list(index.names)
-        names[-1] = "column"
-        index.set_names(names, inplace=True)
-        return index
-
-    def _get_matrix_index(self) -> pd.MultiIndex:
-        """Return multiindex object to describe adjustment matrices."""
-        orient_index = self._get_matrix_orientation_index()
-        if orient_index is not None:
-            return self._matrix_coord_index.append(orient_index)
-        return self._matrix_coord_index
-
-    def _get_matrix_coord_index(self) -> pd.MultiIndex:
-        """Return multiindex object to describe coordinate indices in adjustment matrices."""
-        coordinate_mask = self._matrices.indexer.coordinate_indices != INVALID_INDEX
-        coordinate_indices = self._matrices.indexer.coordinate_indices[coordinate_mask]
-        return coordinate_indices.stack(future_stack=True).index
-
-    def _get_matrix_orientation_index(self) -> pd.MultiIndex | None:
-        """Return multiindex object to describe oreientation indices in adjustment matrices."""
-        index = self._matrices.indexer.orientation_indices
-        if index is None:
-            return
-
-        orientation_mask = index != INVALID_INDEX
-        orientation_indices = index[orientation_mask]
-        return pd.MultiIndex.from_arrays(
-            [orientation_indices.index, ["orientation"] * orientation_indices.size]
-        )
-
-
-    def _get_lsq_iteration(self) -> AdjustmentIteration:
-        """Returns iteration object."""
-        return DenseIteration(self._matrices)
