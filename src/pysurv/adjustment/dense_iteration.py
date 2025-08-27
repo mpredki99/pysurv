@@ -10,6 +10,7 @@ from warnings import warn
 import numpy as np
 from numpy.linalg import pinv
 
+from pysurv.utils.utils import reset_object_cache
 from pysurv.warnings import SVDNotConvergeWarning
 
 from ._constants import INVALID_INDEX
@@ -117,9 +118,9 @@ class DenseIteration(AdjustmentIteration):
             cross_product = self._get_cross_product()
             increments = inv_matrix_G @ cross_product
 
-            self._reset_cache()
+            reset_object_cache(self)
 
-            self._counter += 1
+            self._increase_current()
             self._matrix_g = matrix_g
             self._inv_matrix_G = inv_matrix_G
             self._cross_product = cross_product
@@ -129,7 +130,7 @@ class DenseIteration(AdjustmentIteration):
 
         except np.linalg.LinAlgError:
             warn(
-                f"Calculations aborted due to SVD did not converge in {self._counter + 1}. iteration.",
+                f"Calculations aborted due to SVD did not converge in {self._current + 1}. iteration.",
                 SVDNotConvergeWarning,
             )
             return False
@@ -218,10 +219,3 @@ class DenseIteration(AdjustmentIteration):
             return None
 
         return sW.diagonal()[self._coord_idx]
-
-    def _reset_cache(self):
-        """Reset cached properties values."""
-        for name in dir(self.__class__):
-            attr = getattr(self.__class__, name)
-            if isinstance(attr, cached_property) and name in self.__dict__:
-                del self.__dict__[name]

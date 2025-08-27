@@ -14,15 +14,15 @@ class AdjustmentIteration(ABC):
 
     def __init__(self, matrices: AdjustmentMatrices) -> None:
         self._lsq_matrices = matrices
-        self._counter = 0
+        self._current = 0
 
     def __bool__(self):
-        return self._counter > 0
+        return self._current > 0
 
     @property
-    def counter(self):
+    def current(self):
         """Return the current iteration counter."""
-        return self._counter
+        return self._current
 
     @property
     @abstractmethod
@@ -100,3 +100,6 @@ class AdjustmentIteration(ABC):
     def run(self):
         """Run the LSQ iteration."""
         pass
+
+    def _increase_current(self):
+        self._current += 1
