@@ -4,7 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-from functools import wraps
+from functools import cached_property, wraps
 from typing import Callable
 
 import numpy as np
@@ -43,3 +43,12 @@ def apply_where(
         result[~cond] = func_false(arg[~cond])
 
     return result
+
+
+def reset_object_cache(object: object, deep=True) -> None:
+    """Reset object's cached properties values."""
+    mro = object.__class__.__mro__ if deep else [object.__class__]
+    for cls in mro:
+        for name, attr in cls.__dict__.items():
+            if isinstance(attr, cached_property):
+                object.__dict__.pop(name, None)
