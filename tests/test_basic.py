@@ -29,53 +29,53 @@ def test_angles_from_rad() -> None:
 
 def test_azimuth_overlaping_points() -> None:
     """Test azimuth for overlapping points."""
-    value: float = azimuth(0, 0, 0, 0)
-    assert value == 0
+    value = azimuth(0, 0, 0, 0)
+    assert np.isnan(value)
 
 
 def test_azimuth_north_direction() -> None:
     """Test azimuth for north direction."""
-    value: float = azimuth(0, 0, 100, 0)
+    value = azimuth(0, 0, 100, 0)
     assert value == 0
 
 
 def test_azimuth_first_quarter() -> None:
     """Test azimuth in the first quarter."""
-    value: float = azimuth(0, 0, 100, 100)
+    value = azimuth(0, 0, 100, 100)
     assert value == np.pi / 4
 
 
 def test_azimuth_east_direction() -> None:
     """Test azimuth for east direction."""
-    value: float = azimuth(0, 0, 0, 100)
+    value = azimuth(0, 0, 0, 100)
     assert value == np.pi / 2
 
 
 def test_azimuth_second_quarter() -> None:
     """Test azimuth in the second quarter."""
-    value: float = azimuth(0, 0, -100, 100)
+    value = azimuth(0, 0, -100, 100)
     assert value == np.pi * 3 / 4
 
 
 def test_azimuth_south_direction() -> None:
     """Test azimuth for south direction."""
-    value: float = azimuth(0, 0, -100, 0)
+    value = azimuth(0, 0, -100, 0)
     assert value == np.pi
 
 
 def test_azimuth_third_quarter() -> None:
     """Test azimuth in the third quarter."""
-    value: float = azimuth(0, 0, -100, -100)
+    value = azimuth(0, 0, -100, -100)
     assert value == np.pi * 5 / 4
 
 
 def test_azimuth_west_direction() -> None:
     """Test azimuth for west direction."""
-    value: float = azimuth(0, 0, 0, -100)
+    value = azimuth(0, 0, 0, -100)
     assert value == np.pi * 3 / 2
 
 
 def test_azimuth_forth_quarter() -> None:
     """Test azimuth in the fourth quarter."""
-    value: float = azimuth(0, 0, 100, -100)
+    value = azimuth(0, 0, 100, -100)
     assert value == np.pi * 7 / 4

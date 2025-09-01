@@ -12,9 +12,16 @@ from typing import Any, Callable, Type
 import numpy as np
 
 
+rho = {
+    "grad": 200 / np.pi,
+    "gon": 200 / np.pi,
+    "deg": 180 / np.pi,
+    "rad": 1
+}
+
+
 def inf_to_zero(func):
     """Decorator that turns infinite values to 0 (robust methods have limit 0 with v -> inf)."""
-
     @wraps(func)
     def wrapper(v, *args, **kwargs):
         is_finite_mask = np.isfinite(v)
@@ -32,7 +39,6 @@ class refreshable_property:
     values of all cached properties that are stored in the object
     instance (including ordinary cached properties).
     """
-
     def __init__(
         self,
         func: Callable | None = None,
