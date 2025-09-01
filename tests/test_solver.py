@@ -72,7 +72,7 @@ def test_solve_free_adj_weighted(
     solver = Solver(adjustment_test_matrices)
 
     assert solver.solve()
-    
+
 
 def test_solve_free_adj_robust(
     adjustment_test_matrices: AdjustmentMatrices, adjustment_test_dataset: Dataset
