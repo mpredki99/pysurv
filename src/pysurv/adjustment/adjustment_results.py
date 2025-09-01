@@ -20,7 +20,7 @@ class AdjustmentResults(ABC):
         self._matrix_coordinate_index = self._get_matrix_coord_index()
         self._matrix_orientation_index = self._get_matrix_orientation_index()
         self._matrix_index = self._get_matrix_index()
-        
+
     def __bool__(self):
         return self.n_iter > 0
 
