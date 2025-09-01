@@ -9,8 +9,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 
-from pysurv.utils.utils import reset_object_cache
-
 from .adjustment_iteration import AdjustmentIteration
 from .adjustment_matrices import AdjustmentMatrices
 from .adjustment_results import AdjustmentResults
@@ -37,19 +35,9 @@ class AdjustmentSolver(ABC):
         self._coord_correction_variances = self._get_coord_correction_variances()
 
         self._iteration = self._get_adjustment_iteration()
-        self._results = self._get_adjustment_results()
+        # self._results = self._get_adjustment_results()
 
         self._matrices.methods._inject_solver(self)
-
-    @property
-    def results(self):
-        """Prepare if needed and return adjustment results."""
-        if self.current_iter == 0:
-            return None
-
-        if self.current_iter > self._results.n_iter:
-            reset_object_cache(self._results)
-        return self._results
 
     @property
     def matrices(self):
@@ -223,10 +211,10 @@ class AdjustmentSolver(ABC):
         """Returns adjustment iteration object."""
         pass
 
-    @abstractmethod
-    def _get_adjustment_results(self) -> AdjustmentResults:
-        """Returns adjustment results object."""
-        pass
+    # @abstractmethod
+    # def _get_adjustment_results(self) -> AdjustmentResults:
+    #     """Returns adjustment results object."""
+    #     pass
 
     @abstractmethod
     def _get_residual_variances(self):

@@ -9,6 +9,7 @@ from pysurv.data.dataset import Dataset
 from .dense_matrices import DenseMatrices
 from .method_manager import MethodManager
 from .report import Report
+from .results import Results
 from .solver import Solver
 
 
@@ -30,7 +31,6 @@ class Adjustment:
         config_solver_index: str | None = None,
         create_list_of_variances: bool = False,
     ) -> None:
-        self._dataset = dataset
         method_manager = MethodManager(
             obs_adj=obs_adj,
             obs_tuning_constants=obs_tuning_constants,
@@ -38,26 +38,30 @@ class Adjustment:
             free_adj_tuning_constants=free_adj_tuning_constants,
         )
         matrices = DenseMatrices(
-            self._dataset,
+            dataset,
             method_manager,
             config_sigma_index=config_sigma_index,
             build_strategy=matrices_build_strategy,
         )
-        self._solver = Solver(
+        solver = Solver(
             matrices,
             config_solver_index=config_solver_index,
             create_list_of_variances=create_list_of_variances,
         )
-        self._results = None
+        self._results = Results(solver)
         self._report = None
 
     @property
+    def results(self):
+        return self._results
+
+    @property
     def solver(self):
-        return self._solver
+        return self._results.solver
 
     @property
     def matrices(self):
-        return self._solver.matrices
+        return self.solver.matrices
 
     @property
     def methods(self):
@@ -65,15 +69,11 @@ class Adjustment:
 
     @property
     def dataset(self):
-        return self._dataset
-
-    @property
-    def results(self):
-        return self._solver.results
+        return self.solver.dataset
 
     @property
     def report(self):
         """Return the adjustment report."""
-        if self.results is not None:
-            self._report = Report(self._solver.results)
+        if self.results:
+            self._report = Report(self._results)
         return self._report

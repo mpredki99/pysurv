@@ -6,6 +6,7 @@
 
 from pysurv import Adjustment, Dataset
 from pysurv.adjustment import DenseMatrices, MethodManager, Report, Solver
+from pysurv.adjustment.results import Results
 
 
 def test_instantiation(adjustment_test_dataset: Dataset):
@@ -16,6 +17,7 @@ def test_instantiation(adjustment_test_dataset: Dataset):
     assert isinstance(adjustment.methods, MethodManager)
     assert isinstance(adjustment.matrices, DenseMatrices)
     assert isinstance(adjustment.solver, Solver)
+    assert isinstance(adjustment.results, Results)
     assert adjustment.report is None
 
 

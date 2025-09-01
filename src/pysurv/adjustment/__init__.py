@@ -10,6 +10,7 @@ from .config_solver import config_solver
 from .dense_matrices import DenseMatrices
 from .method_manager import MethodManager
 from .report import Report
+from .results import Results
 from .solver import Solver
 
 __all__ = [
@@ -19,6 +20,7 @@ __all__ = [
     "MethodManager",
     "observation_equations",
     "Report",
+    "Results",
     "robust",
     "Solver",
 ]

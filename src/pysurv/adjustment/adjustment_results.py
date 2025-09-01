@@ -5,11 +5,11 @@
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
 from abc import ABC, abstractmethod
-from functools import cached_property
 
 import pandas as pd
 
 from pysurv.data.controls import Controls
+from pysurv.utils.utils import refreshable_property
 
 
 class AdjustmentResults(ABC):
@@ -20,6 +20,17 @@ class AdjustmentResults(ABC):
         self._matrix_coordinate_index = self._get_matrix_coord_index()
         self._matrix_orientation_index = self._get_matrix_orientation_index()
         self._matrix_index = self._get_matrix_index()
+        
+    def __bool__(self):
+        return self.n_iter > 0
+
+    @property
+    def solver(self):
+        return self._solver
+
+    @property
+    def _is_deprecated(self):
+        return self._solver.current_iter > self.__dict__.get("n_iter", 0)
 
     @property
     def dataset(self):
@@ -57,11 +68,11 @@ class AdjustmentResults(ABC):
     def n_coord_corrections(self):
         return self._solver.n_coord_corrections
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def n_iter(self) -> int:
         return self._solver.current_iter
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def matrix_G(self) -> pd.DataFrame | None:
         """Return G matrix as indexed DataFrame."""
         if self._solver.matrix_G is None:
@@ -73,7 +84,7 @@ class AdjustmentResults(ABC):
             columns=self._matrix_index,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def inv_matrix_G(self) -> pd.DataFrame | None:
         """Return inverse of G matrix as indexed DataFrame."""
         if self._solver.inv_matrix_G is None:
@@ -85,7 +96,7 @@ class AdjustmentResults(ABC):
             columns=self._matrix_index,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def cross_product(self) -> pd.DataFrame | None:
         """Rerurn cross product"""
         if self._solver.cross_product is None:
@@ -97,7 +108,7 @@ class AdjustmentResults(ABC):
             name="cross_product",
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def covariance_X(self) -> pd.DataFrame | None:
         """Return the covariance matrix of X."""
         if self._solver.covariance_X is None:
@@ -109,7 +120,7 @@ class AdjustmentResults(ABC):
             columns=self._matrix_index,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def covariance_Y(self) -> pd.DataFrame | None:
         """Return the covariance matrix of Y."""
         if self._solver.covariance_Y is None:
@@ -121,7 +132,7 @@ class AdjustmentResults(ABC):
             columns=self._observation_index,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def covariance_r(self) -> pd.DataFrame | None:
         """Return the covariance matrix of residuals."""
         if self._solver.covariance_r is None:
@@ -133,7 +144,7 @@ class AdjustmentResults(ABC):
             columns=self._observation_index,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def increments(self) -> pd.Series | None:
         """Return increments."""
         if self._solver.increments is None:
@@ -143,7 +154,7 @@ class AdjustmentResults(ABC):
             self._solver.increments, index=self._matrix_index, name="increments"
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_increments(self) -> pd.Series | None:
         """Return fitered for just coordinate increments."""
         if self._solver.coord_increments is None:
@@ -155,7 +166,7 @@ class AdjustmentResults(ABC):
             name="coord_increments",
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def increment_matrix(self) -> pd.DataFrame | None:
         """Return increment matrix."""
         if self._solver.increment_matrix is None:
@@ -167,7 +178,7 @@ class AdjustmentResults(ABC):
             columns=self._solver.dataset.controls.coordinate_columns,
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coordinate_weights(self) -> pd.DataFrame | None:
         """Return the point weights."""
         if self._solver.coordinate_weights is None:
@@ -181,7 +192,7 @@ class AdjustmentResults(ABC):
         df.columns = [f"w{col}" for col in df.columns]
         return df
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def obs_residuals(self) -> pd.DataFrame | None:
         """Return observation residuals."""
         if self._solver.obs_residuals is None:
@@ -204,11 +215,11 @@ class AdjustmentResults(ABC):
     def n_fixed_tie_points(self) -> int:
         return self._solver.n_fixed_tie_points
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def residual_variance(self) -> float | None:
         return self._solver.residual_variance
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def residual_variances(self) -> pd.Series | None:
         if self._solver.residual_variances is None:
             return
@@ -219,11 +230,11 @@ class AdjustmentResults(ABC):
             name="residual_variance",
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_correction_variance(self) -> float | None:
         return self._solver.coord_correction_variance
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_correction_variances(self) -> pd.Series | None:
         if self._solver.coord_correction_variances is None:
             return
@@ -234,12 +245,12 @@ class AdjustmentResults(ABC):
             name="coord_correction_variances",
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def residual_sigma(self) -> float | None:
         """Return value of residual sigma."""
         return self._solver.residual_sigma
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def residual_sigmas(self) -> pd.Series | None:
         if self._solver.residual_sigmas is None:
             return
@@ -248,12 +259,12 @@ class AdjustmentResults(ABC):
             self._solver.residual_sigmas, index=self._iter_index, name="residual_sigmas"
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_correction_sigma(self) -> float | None:
         """Return value of coordinate corrections sigma."""
         return self._solver.coord_correction_sigma
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_correction_sigmas(self) -> pd.Series | None:
         if self._solver.coord_correction_sigmas is None:
             return
@@ -264,7 +275,7 @@ class AdjustmentResults(ABC):
             name="coord_correction_sigmas",
         ).rename_axis("n_iter")
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coord_corrections(self) -> pd.DataFrame:
         return pd.DataFrame(
             self._solver.coord_corrections,
@@ -272,7 +283,7 @@ class AdjustmentResults(ABC):
             columns=[f"v{col}" for col in self.approx_coordinates.columns],
         )
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def normalized_residuals(self) -> pd.Series:
         df = pd.Series(
             self._solver.normalized_residuals,
@@ -282,7 +293,7 @@ class AdjustmentResults(ABC):
         df.columns = [f"v_norm {col}" for col in df.columns]
         return df
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def normalized_corrections(self) -> pd.Series:
         df = pd.Series(
             self._solver.normalized_corrections,
@@ -291,29 +302,29 @@ class AdjustmentResults(ABC):
         df.columns = [f"v_norm {col}" for col in df.columns]
         return df
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def calculation_status(self) -> str:
         success = "Calculations succeed"
         failiture = "Calculations aborted due to SVD did not converge"
         return success if self._solver.svd_converge else failiture
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def adjusted_coordinate_sigmas(self) -> pd.DataFrame:
         return self._get_adjusted_coordinate_sigmas()
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def coordinate_error_elipses(self) -> pd.DataFrame | None:
         return self._get_coord_error_elipses()
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def adjusted_observation_values(self) -> pd.DataFrame:
         return self._get_adjusted_observation_values()
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def adjusted_observation_sigmas(self) -> pd.DataFrame:
         return self._get_adjusted_observation_sigmas()
 
-    @cached_property
+    @refreshable_property(refresh="_is_deprecated", reset_all=True)
     def _iter_index(self):
 
         return pd.Index(range(1, self.n_iter + 1), name="n_iter")

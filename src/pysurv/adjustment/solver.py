@@ -99,7 +99,7 @@ class Solver(AdjustmentSolver):
     def solve(self):
         """Run the adjustment process."""
         if not self.iterate():
-            return self.results
+            return False
         return self._check_condition()
 
     def iterate(self):
@@ -188,7 +188,7 @@ class Solver(AdjustmentSolver):
     def _check_condition(self):
         """Check if iteration should stop or continue."""
         if self._is_increments_within_threshold() or self._is_max_iter_exceeded():
-            return self.results
+            return True
         return self.solve()
 
     def _is_max_iter_exceeded(self):
@@ -253,8 +253,8 @@ class Solver(AdjustmentSolver):
         """Returns iteration object."""
         return DenseIteration(self._matrices)
 
-    def _get_adjustment_results(self) -> Results:
-        return Results(self)
+    # def _get_adjustment_results(self) -> Results:
+    #     return Results(self)
 
     def _get_n_coord_corrections(self) -> int | None:
         if self.coord_corrections is None:

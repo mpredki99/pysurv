@@ -9,26 +9,14 @@ from pysurv.adjustment import Solver
 from pysurv.adjustment.adjustment_matrices import AdjustmentMatrices
 
 
-def test_prepare_results(
-    adjustment_test_matrices: AdjustmentMatrices, adjustment_test_dataset: Dataset
-) -> None:
-    """Test that beofre start calculations results are not generated."""
-    solver = Solver(adjustment_test_matrices)
-
-    assert solver.current_iter == 0
-    assert solver.results is None
-
-
 def test_iterate(
     adjustment_test_matrices: AdjustmentMatrices, adjustment_test_dataset: Dataset
 ) -> None:
     """Test that iterate method works properly."""
     solver = Solver(adjustment_test_matrices)
 
-    solver.iterate()
-
+    assert solver.iterate()
     assert solver.current_iter == 1
-    assert solver.results is not None
 
 
 def test_solve_observation_ordinary(
@@ -39,13 +27,7 @@ def test_solve_observation_ordinary(
     matrices.methods.obs_adj = "ordinary"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.obs_adj == "ordinary"
-    assert solver.results.inner_constraints is None
-    assert solver.results is not None
+    assert solver.solve()
 
 
 def test_solve_observation_weighted(
@@ -56,13 +38,7 @@ def test_solve_observation_weighted(
     matrices.methods.obs_adj = "weighted"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.obs_adj == "weighted"
-    assert solver.results.inner_constraints is None
-    assert solver.results is not None
+    assert solver.solve()
 
 
 def test_solve_observation_robust(
@@ -73,13 +49,7 @@ def test_solve_observation_robust(
     matrices.methods.obs_adj = "huber"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.obs_adj == "huber"
-    assert solver.results.inner_constraints is None
-    assert solver.results is not None
+    assert solver.solve()
 
 
 def test_solve_free_adj_ordinary(
@@ -90,13 +60,7 @@ def test_solve_free_adj_ordinary(
     matrices.methods.free_adjustment = "ordinary"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.free_adjustment == "ordinary"
-    assert solver.results.inner_constraints == ["pseudoinverse"]
-    assert solver.results is not None
+    assert solver.solve()
 
 
 def test_solve_free_adj_weighted(
@@ -107,14 +71,8 @@ def test_solve_free_adj_weighted(
     matrices.methods.free_adjustment = "weighted"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.free_adjustment == "weighted"
-    assert solver.results.inner_constraints is not None
-    assert solver.results is not None
-
+    assert solver.solve()
+    
 
 def test_solve_free_adj_robust(
     adjustment_test_matrices: AdjustmentMatrices, adjustment_test_dataset: Dataset
@@ -124,10 +82,4 @@ def test_solve_free_adj_robust(
     matrices.methods.free_adjustment = "huber"
     solver = Solver(adjustment_test_matrices)
 
-    assert solver.results is None
-
-    solver.solve()
-
-    assert solver.results.methods.free_adjustment == "huber"
-    assert solver.results.inner_constraints is not None
-    assert solver.results is not None
+    assert solver.solve()
