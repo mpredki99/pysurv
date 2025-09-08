@@ -67,6 +67,11 @@ class AdjustmentReport(ABC):
             " ",
         ]
 
+    def __bool__(self):
+        if not self._results:
+            return False
+        return True
+
     def _report_part_to_string(self, part: dict) -> str:
         return "\n".join(
             f"{key} {value}" for key, value in part.items() if value is not None

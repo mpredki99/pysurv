@@ -62,12 +62,23 @@ class MatrixXYWsWConstructor(MatrixConstructor):
         self,
         dataset: Dataset,
         matrix_x_indexer: IndexerMatrixX,
-        default_sigmas_index: str,
+        default_sigmas_index: str | None,
     ) -> None:
         super().__init__(dataset, matrix_x_indexer)
 
-        default_sigmas_index = default_sigmas_index or config_sigma.default_index
-        self._default_sigmas = config_sigma[default_sigmas_index]
+        self._default_sigmas_index = default_sigmas_index or config_sigma.default_index
+        self._default_sigmas = config_sigma[self._default_sigmas_index]
+
+    @property
+    def default_sigmas_index(self):
+        return self._default_sigmas_index
+
+    @default_sigmas_index.setter
+    def default_sigmas_index(self, new_default_sigmas_index: str | None):
+        self._default_sigmas_index = (
+            new_default_sigmas_index or config_sigma.default_index
+        )
+        self._default_sigmas = config_sigma[self._default_sigmas_index]
 
 
 class MatrixXYWConstructor(MatrixXYWsWConstructor):

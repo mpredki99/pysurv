@@ -44,15 +44,17 @@ class Project:
 
         self._adjustment = Adjustment(
             self._dataset,
-            obs_adj=obs_adj,
-            obs_tuning_constants=obs_tuning_constants,
-            free_adjustment=free_adjustment,
-            free_adj_tuning_constants=free_adj_tuning_constants,
-            config_sigma_index=config_sigma_index,
-            matrices_build_strategy=matrices_build_strategy,
-            config_solver_index=config_solver_index,
-            create_list_of_variances=create_list_of_variances,
         )
+        self.adjustment.methods.obs_adj = obs_adj
+        self.adjustment.methods.obs_tuning_constants = obs_tuning_constants
+        self.adjustment.methods.free_adjustment = free_adjustment
+        self.adjustment.methods.free_adj_tuning_constants = free_adj_tuning_constants
+
+        self.adjustment.matrices.default_sigmas_index = config_sigma_index
+        self.adjustment.matrices.build_strategy = matrices_build_strategy
+
+        self.adjustment.solver.config_index = config_solver_index
+        self.adjustment.solver.create_list_of_variances = create_list_of_variances
 
         self._adjustment.solver.solve()
         return self._adjustment.report

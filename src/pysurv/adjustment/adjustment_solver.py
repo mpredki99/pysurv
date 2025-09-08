@@ -35,9 +35,24 @@ class AdjustmentSolver(ABC):
         self._coord_correction_variances = self._get_coord_correction_variances()
 
         self._iteration = self._get_adjustment_iteration()
-        # self._results = self._get_adjustment_results()
 
         self._matrices.methods._inject_solver(self)
+
+    @property
+    def config_index(self):
+        return self._config_solver.name
+
+    @config_index.setter
+    def config_index(self, new_config_solver_index):
+        self._config_solver = self._get_config_solver(new_config_solver_index)
+
+    @property
+    def create_list_of_variances(self):
+        return self._create_list_of_variances
+
+    @create_list_of_variances.setter
+    def create_list_of_variances(self, value: bool):
+        self._create_list_of_variances = value
 
     @property
     def matrices(self):
@@ -210,11 +225,6 @@ class AdjustmentSolver(ABC):
     def _get_adjustment_iteration(self) -> AdjustmentIteration:
         """Returns adjustment iteration object."""
         pass
-
-    # @abstractmethod
-    # def _get_adjustment_results(self) -> AdjustmentResults:
-    #     """Returns adjustment results object."""
-    #     pass
 
     @abstractmethod
     def _get_residual_variances(self):

@@ -18,7 +18,7 @@ def test_instantiation(adjustment_test_dataset: Dataset):
     assert isinstance(adjustment.matrices, DenseMatrices)
     assert isinstance(adjustment.solver, Solver)
     assert isinstance(adjustment.results, Results)
-    assert adjustment.report is None
+    assert isinstance(adjustment.report, Report)
 
 
 def test_report_instantiation(adjustment_test_dataset: Dataset):

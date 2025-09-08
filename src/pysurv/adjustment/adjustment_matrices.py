@@ -65,6 +65,29 @@ class AdjustmentMatrices(ABC):
         self._methods._inject_matrices(self)
 
     @property
+    def default_sigmas_index(self):
+        return self._xyw_sw_init_strategy.xyw_constructor.default_sigmas_index
+
+    @default_sigmas_index.setter
+    def default_sigmas_index(self, value):
+        self._xyw_sw_init_strategy.xyw_constructor.default_sigmas_index = value
+        self._xyw_sw_init_strategy.sw_constructor.default_sigmas_index = value
+
+    @property
+    def build_strategy(self):
+        return type(self._xyw_sw_init_strategy)
+
+    @build_strategy.setter
+    def build_strategy(self, new_build_strategy):
+        config_sigma_index = self.default_sigmas_index
+        self._xyw_sw_init_strategy = get_strategy(
+            self._dataset,
+            self._indexer,
+            config_sigma_index,
+            name=new_build_strategy,
+        )
+
+    @property
     def dataset(self):
         return self._dataset
 

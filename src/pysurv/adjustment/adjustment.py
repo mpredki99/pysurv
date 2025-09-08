@@ -6,6 +6,11 @@
 
 from pysurv.data.dataset import Dataset
 
+from .adjustment_matrices import AdjustmentMatrices
+from .adjustment_method_manager import AdjustmentMethodManager
+from .adjustment_report import AdjustmentReport
+from .adjustment_results import AdjustmentResults
+from .adjustment_solver import AdjustmentSolver
 from .dense_matrices import DenseMatrices
 from .method_manager import MethodManager
 from .report import Report
@@ -22,58 +27,40 @@ class Adjustment:
     def __init__(
         self,
         dataset: Dataset,
-        obs_adj: str = "weighted",
-        obs_tuning_constants: dict | None = None,
-        free_adjustment: str | None = None,
-        free_adj_tuning_constants: dict | None = None,
-        config_sigma_index: str | None = None,
-        matrices_build_strategy: str | None = None,
-        config_solver_index: str | None = None,
-        create_list_of_variances: bool = False,
+        method_manager: AdjustmentMethodManager | None = None,
+        matrices: AdjustmentMatrices | None = None,
+        solver: AdjustmentSolver | None = None,
+        results: AdjustmentResults | None = None,
+        report: AdjustmentReport | None = None,
     ) -> None:
-        method_manager = MethodManager(
-            obs_adj=obs_adj,
-            obs_tuning_constants=obs_tuning_constants,
-            free_adjustment=free_adjustment,
-            free_adj_tuning_constants=free_adj_tuning_constants,
-        )
-        matrices = DenseMatrices(
-            dataset,
-            method_manager,
-            config_sigma_index=config_sigma_index,
-            build_strategy=matrices_build_strategy,
-        )
-        solver = Solver(
-            matrices,
-            config_solver_index=config_solver_index,
-            create_list_of_variances=create_list_of_variances,
-        )
-        self._results = Results(solver)
-        self._report = None
+        self._dataset = dataset
+        self._method_manager = method_manager or MethodManager()
+        self._matrices = matrices or DenseMatrices(self._dataset, self._method_manager)
+        self._solver = solver or Solver(self._matrices)
+        self._results = results or Results(self._solver)
+        self._report = report or Report(self._results)
+
+    @property
+    def dataset(self):
+        return self._dataset
+
+    @property
+    def methods(self):
+        return self._method_manager
+
+    @property
+    def matrices(self):
+        return self._matrices
+
+    @property
+    def solver(self):
+        return self._solver
 
     @property
     def results(self):
         return self._results
 
     @property
-    def solver(self):
-        return self._results.solver
-
-    @property
-    def matrices(self):
-        return self.solver.matrices
-
-    @property
-    def methods(self):
-        return self.matrices.methods
-
-    @property
-    def dataset(self):
-        return self.solver.dataset
-
-    @property
     def report(self):
         """Return the adjustment report."""
-        if self.results:
-            self._report = Report(self._results)
         return self._report

@@ -26,6 +26,9 @@ class Report(AdjustmentReport):
         return "\n\n".join(content)
 
     def __str__(self):
+        if not self._results:
+            return ""
+
         report_content = [
             self._title,
             self.general_information,

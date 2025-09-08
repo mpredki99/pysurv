@@ -26,19 +26,19 @@ class MemoryStrategy(MatrixXYWsWStrategy):
         default_sigmas_index: str | None,
     ) -> None:
         super().__init__()
-        self._xyw_builder = MemoryXYWConstructor(
+        self._xyw_constructor = MemoryXYWConstructor(
             dataset, matrix_x_indexer, default_sigmas_index
         )
-        self._sw_builder = MemorySWConstructor(
+        self._sw_consrtuctor = MemorySWConstructor(
             dataset, matrix_x_indexer, default_sigmas_index
         )
 
     @property
-    def xyw_constructor(self):
+    def xyw_constructor(self) -> MemoryXYWConstructor:
         """Returns memory safe constructor for X, Y, W matrices."""
-        return self._xyw_builder
+        return self._xyw_constructor
 
     @property
-    def sw_constructor(self):
+    def sw_constructor(self) -> MemorySWConstructor:
         """Returns memory safe constructor for sW matrix."""
-        return self._sw_builder
+        return self._sw_consrtuctor
