@@ -16,6 +16,7 @@ def validate_angle_unit(v: str | None) -> str:
         from pysurv.config import config
 
         v = config.angle_unit
+
     if v not in ["rad", "grad", "gon", "deg"]:
         raise InvalidAngleUnitError(
             "Angle unit must be either 'rad', 'grad', 'gon', 'deg'."
