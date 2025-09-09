@@ -6,11 +6,12 @@
 
 from pysurv.adjustment.adjustment import Adjustment
 from pysurv.data.dataset import Dataset
+from .project_factory import ProjectFactory
 
 from .config import config
 
 
-class Project:
+class Project(ProjectFactory):
     """
     Root class for managing a pysurv project, including data, configuration, and adjustment operations.
 
