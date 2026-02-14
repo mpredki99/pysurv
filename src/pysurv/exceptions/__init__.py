@@ -10,6 +10,7 @@ from ._exceptions import (
     InvalidDataError,
     InvalidMethodError,
     MissingMandatoryColumnsError,
+    ValidationError
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "InvalidDataError",
     "InvalidMethodError",
     "MissingMandatoryColumnsError",
+    "ValidationError"
 ]

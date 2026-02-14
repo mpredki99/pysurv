@@ -9,6 +9,10 @@ class PySurvException(Exception):
     pass
 
 
+class ValidationError(PySurvException):
+    pass
+
+
 class InvalidAngleUnitError(PySurvException):
     pass
 
