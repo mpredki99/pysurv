@@ -4,27 +4,24 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
+import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from enum import StrEnum
 from typing import Any, Callable
-import re
 
 import pandas as pd
 
 from pysurv.exceptions import ValidationError
 
-
-class PySurvValidatorMode(StrEnum):
-    RETURN = "return"
-    RAISE = "raise"
+from .constants import COMMENT
+from .utils import PySurvValidatorMode
 
 
 class PySurvValidator(ABC):
     def __init__(
         self,
         *,
-        ignore: Iterable[Any] | Any = pd.NA,
+        ignore: Iterable[Any] | Any = (pd.NA, COMMENT),
         mode: PySurvValidatorMode | str = PySurvValidatorMode.RAISE,
     ) -> None:
         """Configure the validator."""
@@ -130,7 +127,7 @@ class PySurvValidator(ABC):
         else:
             raise ValueError(f"PySurvValidator mode must be PySurvValidatorMode.")
 
-    def ignored_mask(self, data: pd.Series) -> pd.Series:
+    def _ignored_mask(self, data: pd.Series) -> pd.Series:
         """Determine ignored values mask."""
         mask = pd.Series(False, index=data.index)
 
@@ -156,7 +153,7 @@ class PySurvValidator(ABC):
 
         return mask
 
-    def return_validation_result(
+    def _return_validation_result(
         self,
         mask: pd.Series,
         data: pd.Series,
@@ -164,18 +161,20 @@ class PySurvValidator(ABC):
     ) -> tuple[pd.Series, pd.Series]:
         """Return validation results or raise validation error."""
         if self.mode == PySurvValidatorMode.RAISE and not mask.all():
-            self.raise_validation_error(data[~mask], error_message)
+            self._raise_validation_error(data[~mask], error_message)
         else:
             return mask, data
 
     @staticmethod
-    def raise_validation_error(invalid_values: pd.Series, message: str) -> None:
+    def _raise_validation_error(invalid_values: pd.Series, message: str) -> None:
         """Raise formatted error message."""
         invalid_values = invalid_values.rename("value").rename_axis("row").reset_index()
         raise ValidationError(f"{message}\n{invalid_values.to_string(index=False)}")
 
     @staticmethod
-    def return_empty(dtype: type | str, index: pd.Index) -> tuple[pd.Series, pd.Series]:
+    def _return_empty(
+        dtype: type | str, index: pd.Index
+    ) -> tuple[pd.Series, pd.Series]:
         """Return empty pandas Series with proper dtype and index."""
         return pd.Series(dtype=bool, index=index), pd.Series(dtype=dtype, index=index)
 
@@ -204,7 +203,7 @@ class AndValidator(PySurvValidator):
 
         valid_mask = mask_1 & mask_2
 
-        return self.return_validation_result(valid_mask, validated)
+        return self._return_validation_result(valid_mask, validated)
 
     @property
     def ignore(self):

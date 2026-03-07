@@ -1,3 +1,9 @@
+# Coding: UTF-8
+
+# Copyright (C) 2025 Michał Prędki
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files in the repository.
+
 import pandas as pd
 import pytest
 
@@ -5,45 +11,63 @@ from pysurv.exceptions import ValidationError
 from pysurv.validators import GreaterOrEqual
 
 
-def test_ge_empty(ge_data):
-    ge = GreaterOrEqual()
-    mask, values = ge(ge_data.empty)
-
+def test_ge_empty(comparison_data):
+    ge = GreaterOrEqual(0)
+    mask, values = ge(comparison_data.empty)
     assert mask.empty
+    assert mask.dtype == bool
     assert values.empty
+    assert values.dtype == int
 
 
-def test_ge_valid(ge_data):
-    ge = GreaterOrEqual()
-    mask, values = ge(ge_data.valid)
-
+def test_ge_valid(comparison_data):
+    ge = GreaterOrEqual(0)
+    mask, values = ge(comparison_data.valid)
     assert mask.all()
-    assert values.equals(ge_data.valid)
+    assert values.equals(comparison_data.valid)
 
+
+def test_ge_invalid_type(comparison_data):
+    ge = GreaterOrEqual(0)
     with pytest.raises(ValidationError):
-        ge = GreaterOrEqual(5)
-        mask, values = ge(ge_data.valid)
+        ge(comparison_data.invalid_type)
 
 
-def test_ge_invalid(ge_data):
+def test_ge_invalid_value(comparison_data):
+    ge = GreaterOrEqual(0)
     with pytest.raises(ValidationError):
-        ge = GreaterOrEqual()
-        ge(ge_data.invalid)
+        ge(comparison_data.invalid_value)
 
-    ge = GreaterOrEqual(ignore={-3, -2, -1})
-    mask, values = ge(ge_data.invalid)
 
+def test_ge_with_empty(comparison_data):
+    ge = GreaterOrEqual(0)
+    mask, values = ge(comparison_data.with_empty)
     assert mask.all()
-    assert values.equals(ge_data.invalid)
+    assert values.isna().sum() == 2
 
 
-def test_ge_with_empty(ge_data):
-    ge = GreaterOrEqual(ignore={pd.NA, -3})
-    mask, values = ge(ge_data.with_empty)
-
-    assert mask.all()
-    assert values.equals(ge_data.with_empty)
-
-    ge = GreaterOrEqual(ignore=[])
+def test_ge_no_ignore(comparison_data):
+    ge = GreaterOrEqual(0, ignore=[])
     with pytest.raises(ValidationError):
-        ge(ge_data.with_empty)
+        ge(comparison_data.with_empty)
+
+
+def test_ge_ignore_literal(comparison_data):
+    ge = GreaterOrEqual(0, ignore=-1)
+    mask, values = ge(comparison_data.invalid_value)
+    assert mask.all()
+    assert values.equals(comparison_data.invalid_value)
+
+
+def test_ge_ignore_regex(comparison_data):
+    ge = GreaterOrEqual(0)
+    mask, values = ge(comparison_data.regex)
+    assert mask.all()
+    assert values.equals(comparison_data.regex)
+
+
+def test_ge_ignore_callable(comparison_data):
+    ge = GreaterOrEqual(0, ignore=lambda x: x % 2 == 0)
+    mask, values = ge(comparison_data.callable)
+    assert mask.all()
+    assert values.equals(comparison_data.callable)

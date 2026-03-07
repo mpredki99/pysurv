@@ -9,5 +9,5 @@ import operator
 from .comparison_validator import ComparisonValidator
 
 
-class GreaterOrEqual(ComparisonValidator):
-    _operator = operator.ge
+class Greater(ComparisonValidator):
+    _operator = operator.gt

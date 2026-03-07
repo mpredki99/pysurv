@@ -4,10 +4,6 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-import operator
+import re
 
-from .comparison_validator import ComparisonValidator
-
-
-class GreaterOrEqual(ComparisonValidator):
-    _operator = operator.ge
+COMMENT = re.compile(r"^[\s\t]*#")
