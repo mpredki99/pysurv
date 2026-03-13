@@ -29,6 +29,9 @@ class PySurvValidator(ABC):
         self.ignore = ignore
         self.mode = mode
 
+    # ----------------------------------------------------------------------------------
+    # Dunder methods
+    # ----------------------------------------------------------------------------------
     @abstractmethod
     def __call__(
         self,
@@ -41,7 +44,6 @@ class PySurvValidator(ABC):
         """Allow chaining validators."""
         if not isinstance(other, PySurvValidator):
             raise TypeError("Cannot combine PySurvValidator with non-PySurvValidator")
-
         return AndValidator(self, other)
 
     def __repr__(self) -> str:
@@ -51,6 +53,15 @@ class PySurvValidator(ABC):
         )
         return f"{self.__class__.__name__}({attrs})"
 
+    def __contains__(self, value: "PySurvValidator") -> bool:
+        name = getattr(value, "__name__", None)
+        if name:
+            return self.__class__.__name__ == name
+        return isinstance(self, type(value))
+
+    # ----------------------------------------------------------------------------------
+    # Properties
+    # ----------------------------------------------------------------------------------
     @property
     def ignore(self) -> dict[str, Any]:
         """Return current ignore settings as a dict."""
@@ -122,11 +133,12 @@ class PySurvValidator(ABC):
         """Set PySurvValidatorMode or create it from string."""
         if isinstance(value, PySurvValidatorMode):
             self._mode = value
-        elif isinstance(value, str):
-            self._mode = PySurvValidatorMode(value)
         else:
-            raise ValueError(f"PySurvValidator mode must be PySurvValidatorMode.")
+            self._mode = PySurvValidatorMode(value)
 
+    # ----------------------------------------------------------------------------------
+    # Internal helpers
+    # ----------------------------------------------------------------------------------
     def _ignored_mask(self, data: pd.Series) -> pd.Series:
         """Determine ignored values mask."""
         mask = pd.Series(False, index=data.index)
@@ -179,9 +191,9 @@ class PySurvValidator(ABC):
         return pd.Series(dtype=bool, index=index), pd.Series(dtype=dtype, index=index)
 
 
-# ----------------------------------
+# --------------------------------------------------------------------------------------
 #          AndValidator
-# ----------------------------------
+# --------------------------------------------------------------------------------------
 class AndValidator(PySurvValidator):
     def __init__(
         self,
@@ -193,9 +205,9 @@ class AndValidator(PySurvValidator):
         self.right = right
         self.mode = mode
 
-    def __repr__(self) -> str:
-        return f"{self.left!r} & {self.right!r}"
-
+    # ----------------------------------------------------------------------------------
+    # Dunder methods
+    # ----------------------------------------------------------------------------------
     def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Validate data using both validators."""
         mask_1, validated = self.left(data)
@@ -205,6 +217,42 @@ class AndValidator(PySurvValidator):
 
         return self._return_validation_result(valid_mask, validated)
 
+    def __repr__(self) -> str:
+        return f"{self.left!r} & {self.right!r}"
+
+    def __contains__(self, value: PySurvValidator) -> bool:
+        return value in self.left or value in self.right
+
+    def __iter__(self) -> Iterable:
+        for validator in (self.left, self.right):
+            if isinstance(validator, AndValidator):
+                yield from validator
+            else:
+                yield validator
+
+    def __len__(self) -> int:
+        left = len(self.left) if isinstance(self.left, AndValidator) else 1
+        right = len(self.right) if isinstance(self.right, AndValidator) else 1
+        return left + right
+
+    def __getitem__(self, key):
+        validators = tuple(self)
+
+        if isinstance(key, int):
+            return validators[key]
+
+        if isinstance(key, slice):
+            subset = validators[key]
+            result = subset[0]
+
+            for validator in subset[1:]:
+                result = result & validator
+
+            return result
+
+    # ----------------------------------------------------------------------------------
+    # Properties
+    # ----------------------------------------------------------------------------------
     @property
     def ignore(self):
         raise AttributeError(

@@ -6,7 +6,7 @@
 
 import pytest
 
-from pysurv.validators import IsNumeric
+from pysurv.validators import Greater, IsNumeric
 from pysurv.validators.constants import COMMENT
 from pysurv.validators.utils import PySurvValidatorMode
 
@@ -36,3 +36,12 @@ def test_ignore_property():
     assert "literals" in validator.ignore
     assert "regexes" in validator.ignore
     assert "callables" in validator.ignore
+
+
+def test_contains():
+    validator = IsNumeric()
+    assert IsNumeric() in validator
+    assert Greater(0) not in validator
+
+    assert IsNumeric in validator
+    assert Greater not in validator

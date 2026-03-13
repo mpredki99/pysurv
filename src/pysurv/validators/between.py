@@ -27,8 +27,6 @@ class Between(PySurvValidator):
         ignore: Iterable[Any] | Any = (pd.NA, COMMENT),
         mode: PySurvValidatorMode | str = PySurvValidatorMode.RAISE,
     ) -> None:
-        super().__init__(ignore=ignore, mode=mode)
-
         self.minimum = minimum
         self.maximum = maximum
         self.inclusive = inclusive
@@ -50,10 +48,15 @@ class Between(PySurvValidator):
             right = Less(self.maximum, ignore=ignore)
 
         self._validator = left & right
-        self._validator.mode = self.mode
+        super().__init__(ignore=ignore, mode=mode)
 
     def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         return self._validator(data)
+
+    @PySurvValidator.mode.setter
+    def mode(self, value: PySurvValidatorMode | str) -> None:
+        PySurvValidator.mode.fset(self, value)
+        self._validator.mode = self._mode
 
     @property
     def inclusive(self) -> str:
