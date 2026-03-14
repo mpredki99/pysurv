@@ -46,6 +46,9 @@ class PySurvValidator(ABC):
             raise TypeError("Cannot combine PySurvValidator with non-PySurvValidator")
         return AndValidator(self, other)
 
+    def __str__(self) -> str:
+        return self.__class__.__name__
+
     def __repr__(self) -> str:
         """String representation with parameter names (leading '_' are stripped)."""
         attrs = ", ".join(
@@ -95,7 +98,6 @@ class PySurvValidator(ABC):
           will be applied to non-empty values;
           if they return True, the value is ignored
         """
-        # To iterable
         if isinstance(values, Iterable) and not isinstance(values, (str, bytes)):
             raw_values = values
         else:
@@ -216,6 +218,9 @@ class AndValidator(PySurvValidator):
         valid_mask = mask_1 & mask_2
 
         return self._return_validation_result(valid_mask, validated)
+
+    def __str__(self) -> str:
+        return f"{self.left} & {self.right}"
 
     def __repr__(self) -> str:
         return f"{self.left!r} & {self.right!r}"

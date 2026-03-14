@@ -28,6 +28,9 @@ class ComparisonValidator(PySurvValidator, ABC):
         super().__init__(ignore=ignore, mode=mode)
         self.threshold = threshold
 
+    def __str__(self) -> str:
+        return super().__str__() + f"({self.threshold})"
+
     def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         if data.empty:
             return self._return_empty(int, data.index)

@@ -15,6 +15,9 @@ from .pysurv_validator import PySurvValidator
 class ConversionValidator(PySurvValidator, ABC):
     """Base for validators that convert values."""
 
+    def __str__(self) -> str:
+        return super().__str__() + "()"
+
     @property
     @abstractmethod
     def _output_dtype(self) -> type | str: ...
