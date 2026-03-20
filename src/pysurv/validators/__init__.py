@@ -14,6 +14,7 @@ from .is_numeric import IsNumeric
 from .is_text import IsText
 from .less import Less
 from .less_equal import LessOrEqual
+from .pysurv_validator import PySurvValidator
 
 __all__ = [
     "ControlPointModel",
@@ -34,5 +35,6 @@ __all__.extend(
         "IsText",
         "Less",
         "LessOrEqual",
+        "PySurvValidator",
     ]
 )

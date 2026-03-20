@@ -4,6 +4,8 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-from .typing import AngleUnit, DistanceUnit, PySurvUnit
+from abc import ABC
 
-__all__ = ["AngleUnit"]
+
+class PySurvTable(ABC):
+    pass

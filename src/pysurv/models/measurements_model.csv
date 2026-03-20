@@ -1,0 +1,28 @@
+field,required,unit,validator,description
+stn_key,True,None,IsNumeric(ignore=[]),Station primary key
+trg_id,True,None,IsText(ignore=COMMENT),Target point identifier
+trg_h,False,meters,IsNumeric(),Target height above the target point
+trg_sh,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the target height above the target point
+trg_ctr,False,meters,IsNumeric() & GreaterOrEqual(0),Centering standard deviation of the target above the point
+trg_cst,False,meters,IsNumeric(),Target constant
+trg_scst,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the target constant
+sd,False,meters,IsNumeric() & GreaterOrEqual(0),3D spatial distance between the station and the target
+ssd,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the 3D spatial distance
+hd,False,meters,IsNumeric() & GreaterOrEqual(0),Horizontal distance between the station and the target
+shd,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the horizontal distance
+vd,False,meters,IsNumeric(),Vertical distance between the station and the target
+svd,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the vertical distance
+dx,False,meters,IsNumeric(),X-axis component of the GNSS vector
+sdx,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the GNSS vector x-axis component
+dy,False,meters,IsNumeric(),Y-axis component of the GNSS vector
+sdy,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the GNSS vector y-axis component
+dz,False,meters,IsNumeric(),Z-axis component of the GNSS vector
+sdz,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the GNSS vector z-axis component
+a,False,grad,"IsNumeric()",Azimuth from the station to the target
+sa,False,grad,IsNumeric() & GreaterOrEqual(0),Standard deviation of the azimuth
+hz,False,grad,"IsNumeric()",Horizontal direction from the station to the target
+shz,False,grad,IsNumeric() & GreaterOrEqual(0),Standard deviation of the horizontal direction
+vz,False,grad,"IsNumeric()",Zenith angle from the station to the target
+svz,False,grad,IsNumeric() & GreaterOrEqual(0),Standard deviation of the zenith angle
+vh,False,grad,"IsNumeric()",Vertical angle from the horizontal plane to the target
+svh,False,grad,IsNumeric() & GreaterOrEqual(0),Standard deviation of the vertical angle from the horizontal plane

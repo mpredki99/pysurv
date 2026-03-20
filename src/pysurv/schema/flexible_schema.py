@@ -4,6 +4,12 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-from .typing import AngleUnit, DistanceUnit, PySurvUnit
+from .pysurv_schema import PySurvSchema
 
-__all__ = ["AngleUnit"]
+
+class FlexibleSchema(PySurvSchema):
+    """
+    PySurvSchema subclass that enables fields creation, renaming and removing.
+    """
+
+    pass
