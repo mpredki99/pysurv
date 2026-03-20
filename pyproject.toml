@@ -11,13 +11,13 @@ authors = [{name = "Michał Prędki"}]
 readme = "README.md"
 license = {text = "GPL-3.0"}
 
-requires-python = ">=3.12.13"
+requires-python = ">=3.12"
 dependencies = [
-    "numpy>=2.4.2",
-    "pandas>=3.0.1",
-    "geopandas>=1.1.2",
+    "numpy>=2.4",
+    "pandas>=3.0",
+    "geopandas>=1.1",
     "pydantic>=2.11",
-    "scipy>=1.17.0"
+    "scipy>=1.17"
 ]
 
 [dependency-groups]
