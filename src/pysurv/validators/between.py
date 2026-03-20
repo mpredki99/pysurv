@@ -51,7 +51,10 @@ class Between(PySurvValidator):
         super().__init__(ignore=ignore, mode=mode)
 
     def __str__(self) -> str:
-        return super().__str__() + f"({self.minimum}, {self.maximum}, inclusive={self.inclusive})"
+        return (
+            super().__str__()
+            + f"({self.minimum}, {self.maximum}, inclusive={self.inclusive})"
+        )
 
     def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         return self._validator(data)

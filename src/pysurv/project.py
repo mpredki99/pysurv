@@ -6,9 +6,9 @@
 
 from pysurv.adjustment.adjustment import Adjustment
 from pysurv.data.dataset import Dataset
-from .project_factory import ProjectFactory
 
 from .config import config
+from .project_factory import ProjectFactory
 
 
 class Project(ProjectFactory):
