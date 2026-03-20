@@ -27,6 +27,7 @@ tasks:
     cmds:
       - uv sync --group dev
       - uv run pre-commit install
+      - touch {{.VENV_NAME}}/.env-type-dev
       - echo "Dev environment ready."
  
  
@@ -37,16 +38,16 @@ tasks:
     desc: Check code formatting without modifying files
     deps: [dev-env]
     cmds:
-      - uv run isort --check-only src tests
-      - uv run black --check src tests
+      - uv run isort --check-only {{.CLI_ARGS | default "src tests"}}
+      - uv run black --check {{.CLI_ARGS | default "src tests"}}
  
  
   format:
     desc: Format the code
     deps: [dev-env]
     cmds:
-      - uv run isort src tests
-      - uv run black src tests
+      - uv run isort {{.CLI_ARGS | default "src tests"}}
+      - uv run black {{.CLI_ARGS | default "src tests"}}
  
  
   test:
