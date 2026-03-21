@@ -1,5 +1,5 @@
 field,required,unit,validator,description
 unvalidated,True,None,None,Unvalidated field
 text,True,None,IsText(),Text field
-distance,False,meter,IsNumeric(),Distance field
-angle,False,grad,IsNumeric(),Angle field
+distance,False,invalid,IsNumeric(),100
+angle,"True",grad,Invalid(),Angle field

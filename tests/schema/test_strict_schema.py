@@ -12,9 +12,9 @@ from pysurv.typing import AngleUnit, DistanceUnit, PySurvUnit
 from pysurv.validators import Between, PySurvValidator
 
 
-def test_initial_type(model_file_path):
+def test_initial_type(invalid_model_file_path):
     with pytest.raises(ValueError):
-        StrictSchema.from_csv(model_file_path)
+        StrictSchema.from_csv(invalid_model_file_path)
 
 
 # --------------------------------------------------------------------------------------

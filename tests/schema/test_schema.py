@@ -34,22 +34,24 @@ def test_schema_validation_from_string():
 # --------------------------------------------------------------------------------------
 # Test validation on DISABLED mode
 # --------------------------------------------------------------------------------------
-def test_validation_disabled_valid_data(model_file_path, valid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="disabled")
+def test_validation_disabled_valid_data(valid_model_file_path, valid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="disabled")
 
     validated = schema.validate(valid_data.copy())
     assert validated.equals(valid_data)
 
 
-def test_validation_disabled_invalid_data(model_file_path, invalid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="disabled")
+def test_validation_disabled_invalid_data(valid_model_file_path, invalid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="disabled")
 
     validated = schema.validate(invalid_data.copy())
     assert validated.equals(invalid_data)
 
 
-def test_validation_disabled_missing_column_data(model_file_path, missing_column_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="disabled")
+def test_validation_disabled_missing_column_data(
+    valid_model_file_path, missing_column_data
+):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="disabled")
 
     validated = schema.validate(missing_column_data.copy())
     assert validated.equals(missing_column_data)
@@ -58,22 +60,24 @@ def test_validation_disabled_missing_column_data(model_file_path, missing_column
 # --------------------------------------------------------------------------------------
 # Test validation on FIELDS mode
 # --------------------------------------------------------------------------------------
-def test_validation_fields_valid_data(model_file_path, valid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="fields")
+def test_validation_fields_valid_data(valid_model_file_path, valid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="fields")
 
     validated = schema.validate(valid_data.copy())
     assert validated.equals(valid_data)
 
 
-def test_validation_fields_invalid_data(model_file_path, invalid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="fields")
+def test_validation_fields_invalid_data(valid_model_file_path, invalid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="fields")
 
     validated = schema.validate(invalid_data.copy())
     assert validated.equals(invalid_data)
 
 
-def test_validation_fields_missing_column_data(model_file_path, missing_column_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="fields")
+def test_validation_fields_missing_column_data(
+    valid_model_file_path, missing_column_data
+):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="fields")
 
     with pytest.raises(ValidationError):
         schema.validate(missing_column_data.copy())
@@ -82,8 +86,8 @@ def test_validation_fields_missing_column_data(model_file_path, missing_column_d
 # --------------------------------------------------------------------------------------
 # Test validation on EAGER mode
 # --------------------------------------------------------------------------------------
-def test_validation_eager_valid_data(model_file_path, valid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="eager")
+def test_validation_eager_valid_data(valid_model_file_path, valid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="eager")
 
     validated = schema.validate(valid_data.copy())
     assert validated["unvalidated"].equals(valid_data["unvalidated"])
@@ -93,15 +97,17 @@ def test_validation_eager_valid_data(model_file_path, valid_data):
     assert validated["angle"].dtype == "float64"
 
 
-def test_validation_eager_invalid_data(model_file_path, invalid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="eager")
+def test_validation_eager_invalid_data(valid_model_file_path, invalid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="eager")
 
     with pytest.raises(ValidationError):
         schema.validate(invalid_data.copy())
 
 
-def test_validation_eager_missing_column_data(model_file_path, missing_column_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="eager")
+def test_validation_eager_missing_column_data(
+    valid_model_file_path, missing_column_data
+):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="eager")
 
     with pytest.raises(ValidationError):
         schema.validate(missing_column_data.copy())
@@ -110,8 +116,8 @@ def test_validation_eager_missing_column_data(model_file_path, missing_column_da
 # --------------------------------------------------------------------------------------
 # Test validation on LAZY mode
 # --------------------------------------------------------------------------------------
-def test_validation_lazy_valid_data(model_file_path, valid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="lazy")
+def test_validation_lazy_valid_data(valid_model_file_path, valid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="lazy")
 
     validated = schema.validate(valid_data.copy())
     assert validated["unvalidated"].equals(valid_data["unvalidated"])
@@ -121,15 +127,17 @@ def test_validation_lazy_valid_data(model_file_path, valid_data):
     assert validated["angle"].dtype == "float64"
 
 
-def test_validation_lazy_invalid_data(model_file_path, invalid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="lazy")
+def test_validation_lazy_invalid_data(valid_model_file_path, invalid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="lazy")
 
     with pytest.raises(ValidationError):
         schema.validate(invalid_data.copy())
 
 
-def test_validation_lazy_missing_column_data(model_file_path, missing_column_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="lazy")
+def test_validation_lazy_missing_column_data(
+    valid_model_file_path, missing_column_data
+):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="lazy")
 
     with pytest.raises(ValidationError):
         schema.validate(missing_column_data.copy())
@@ -138,8 +146,8 @@ def test_validation_lazy_missing_column_data(model_file_path, missing_column_dat
 # --------------------------------------------------------------------------------------
 # Test validation on COERCE mode
 # --------------------------------------------------------------------------------------
-def test_validation_coerce_valid_data(model_file_path, valid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="coerce")
+def test_validation_coerce_valid_data(valid_model_file_path, valid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="coerce")
 
     validated = schema.validate(valid_data.copy())
     assert validated["unvalidated"].equals(valid_data["unvalidated"])
@@ -149,8 +157,8 @@ def test_validation_coerce_valid_data(model_file_path, valid_data):
     assert validated["angle"].dtype == "float64"
 
 
-def test_validation_coerce_invalid_data(model_file_path, invalid_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="coerce")
+def test_validation_coerce_invalid_data(valid_model_file_path, invalid_data):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="coerce")
 
     validated = schema.validate(invalid_data.copy())
     assert validated["unvalidated"].equals(invalid_data["unvalidated"])
@@ -162,8 +170,10 @@ def test_validation_coerce_invalid_data(model_file_path, invalid_data):
     assert validated.isna().sum().sum() > invalid_data.isna().sum().sum()
 
 
-def test_validation_coerce_missing_column_data(model_file_path, missing_column_data):
-    schema = FlexibleSchema.from_csv(model_file_path, validation_mode="coerce")
+def test_validation_coerce_missing_column_data(
+    valid_model_file_path, missing_column_data
+):
+    schema = FlexibleSchema.from_csv(valid_model_file_path, validation_mode="coerce")
 
     with pytest.raises(ValidationError):
         schema.validate(missing_column_data.copy())

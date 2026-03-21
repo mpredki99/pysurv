@@ -53,5 +53,10 @@ def missing_column_data():
 
 
 @pytest.fixture
-def model_file_path():
-    return Path(__file__).parent / "test_model.csv"
+def valid_model_file_path():
+    return Path(__file__).parent / "valid_model.csv"
+
+
+@pytest.fixture
+def invalid_model_file_path():
+    return Path(__file__).parent / "invalid_model.csv"
