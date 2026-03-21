@@ -58,11 +58,12 @@ def compile_unit(value: Any) -> Any:
     if isinstance(value, PySurvUnit):
         return value
 
-    try:
-        # Try to build PySurvUnit
-        return _compile_unit(value)
-    except (ValueError, KeyError):
-        warn(f"Could not parse PySurvUnit from value: {value}")
+    if isinstance(value, str) and value.strip():
+        try:
+            # Try to build PySurvUnit
+            return _compile_unit(value)
+        except (ValueError, KeyError):
+            warn(f"Could not parse PySurvUnit from value: {value}")
 
     return value
 

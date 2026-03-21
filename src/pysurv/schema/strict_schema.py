@@ -134,7 +134,7 @@ class StrictSchema(PySurvSchema):
         self._model[key] = value
 
     # ----------------------------------------------------------------------------------
-    # Override the pandas accesors
+    # Override pandas accesors
     # ----------------------------------------------------------------------------------
     @property
     def loc(self) -> StrictLocIndexer:
@@ -151,6 +151,17 @@ class StrictSchema(PySurvSchema):
     @property
     def iat(self) -> StrictIatIndexer:
         return StrictIatIndexer(self)
+
+    # ----------------------------------------------------------------------------------
+    # Override pandas properties
+    # ----------------------------------------------------------------------------------
+    @property
+    def index(self) -> StrictLocIndexer:
+        return self._model.index.copy(deep=True)
+
+    @property
+    def columns(self) -> StrictLocIndexer:
+        return self._model.columns.copy(deep=True)
 
     # ----------------------------------------------------------------------------------
     # Ensure strict model's structure

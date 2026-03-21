@@ -1,0 +1,8 @@
+field,required,unit,validator,description
+stn_key,True,None,IsNumeric(ignore=[]),Station primary key
+stn_id,True,None,IsText(ignore=COMMENT),Station point identifier
+stn_h,False,meters,IsNumeric(),Station height above the point
+stn_sh,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation of the station height above the point
+stn_ctr,False,meters,IsNumeric() & GreaterOrEqual(0),Standard deviation  of the centering station above the point
+rz,False,grad,IsNumeric(),Station orientation
+srz,False,grad,IsNumeric() & GreaterOrEqual(0),Standard deviation of the station orientation

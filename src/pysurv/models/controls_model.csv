@@ -1,0 +1,8 @@
+field,required,unit,validator,description
+id,True,None,IsText(ignore=COMMENT),Control point identifier
+x,False,meters,IsNumeric(),X-coordinate
+sx,False,meters,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Standard deviation of the X-coordinate
+y,False,meters,IsNumeric(),Y-coordinate
+sy,False,meters,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Standard deviation of the Y-coordinate
+z,False,meters,IsNumeric(),Z-coordinate
+sz,False,meters,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Standard deviation of the Z-coordinate

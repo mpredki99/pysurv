@@ -6,6 +6,7 @@
 
 from functools import cached_property
 from itertools import chain
+from pathlib import Path
 
 import pandas as pd
 
@@ -35,49 +36,49 @@ class MeasurementsSchema(StrictSchema):
         return pd.Index(["trg_id", "trg_h", "trg_sh", "trg_ctr", "trg_cst", "trg_scst"])
 
     @cached_property
-    def linear_measurements_columns(self):
+    def linear_measurement_columns(self) -> pd.Index:
         return pd.Index(["sd", "hd", "vd", "dx", "dy", "dz"])
 
     @cached_property
-    def linear_measurements_sigma_columns(self):
+    def linear_measurement_sigma_columns(self) -> pd.Index:
         return pd.Index(["ssd", "shd", "svd", "sdx", "sdy", "sdz"])
 
     @cached_property
-    def angular_measurements_columns(self):
+    def angular_measurement_columns(self) -> pd.Index:
         return pd.Index(["a", "hz", "vz", "vh"])
 
     @cached_property
-    def angular_measurements_sigma_columns(self):
+    def angular_measurement_sigma_columns(self) -> pd.Index:
         return pd.Index(["sa", "shz", "svz", "svh"])
 
     @cached_property
-    def measurements_columns(self):
-        return self.linear_measurements_columns.union(self.angular_measurements_columns)
+    def measurement_columns(self) -> pd.Index:
+        return self.linear_measurement_columns.union(self.angular_measurement_columns)
 
     @cached_property
-    def measurements_sigma_columns(self):
-        return self.linear_measurements_sigma_columns.union(
-            self.angular_measurements_sigma_columns
+    def measurement_sigma_columns(self) -> pd.Index:
+        return self.linear_measurement_sigma_columns.union(
+            self.angular_measurement_sigma_columns
         )
 
     @cached_property
-    def linear_columns(self):
+    def linear_columns(self) -> pd.Index:
         return pd.Index(
             chain.from_iterable(
                 zip(
-                    self.linear_measurements_columns,
-                    self.linear_measurements_sigma_columns,
+                    self.linear_measurement_columns,
+                    self.linear_measurement_sigma_columns,
                 )
             )
         )
 
     @cached_property
-    def angular_columns(self):
+    def angular_columns(self) -> pd.Index:
         return pd.Index(
             chain.from_iterable(
                 zip(
-                    self.angular_measurements_columns,
-                    self.angular_measurements_sigma_columns,
+                    self.angular_measurement_columns,
+                    self.angular_measurement_sigma_columns,
                 )
             )
         )
@@ -85,12 +86,12 @@ class MeasurementsSchema(StrictSchema):
     # ----------------------------------------------------------------------------------
     # Internal helpers
     # ----------------------------------------------------------------------------------
-    def _get_measurements_model_file_path(self):
+    def _get_measurements_model_file_path(self) -> Path:
         models_dir = get_models_dir()
         model_path = models_dir / "measurements_model.csv"
 
         if not model_path.is_file():
             raise FileNotFoundError(
-                f"Measurements model file does not exist: {model_path}"
+                f"Measurements model file not found in: {model_path}"
             )
         return model_path
