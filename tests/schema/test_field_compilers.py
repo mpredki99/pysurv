@@ -20,7 +20,7 @@ def test_compile_validator_valid():
     assert isinstance(validator, Between)
 
 
-def test_compile_validator_valid():
+def test_compile_validator_invalid():
     expr = "NotExistingValidator(1)"
     validator = compile_validator(expr)
     assert isinstance(validator, str)

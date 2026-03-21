@@ -4,6 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
+from functools import cached_property
 from itertools import chain
 
 import pandas as pd
@@ -29,37 +30,37 @@ class MeasurementsSchema(StrictSchema):
     # ----------------------------------------------------------------------------------
     # Properties
     # ----------------------------------------------------------------------------------
-    @property
+    @cached_property
     def target_columns(self) -> pd.Index:
         return pd.Index(["trg_id", "trg_h", "trg_sh", "trg_ctr", "trg_cst", "trg_scst"])
 
-    @property
+    @cached_property
     def linear_measurements_columns(self):
         return pd.Index(["sd", "hd", "vd", "dx", "dy", "dz"])
 
-    @property
+    @cached_property
     def linear_measurements_sigma_columns(self):
         return pd.Index(["ssd", "shd", "svd", "sdx", "sdy", "sdz"])
 
-    @property
+    @cached_property
     def angular_measurements_columns(self):
         return pd.Index(["a", "hz", "vz", "vh"])
 
-    @property
+    @cached_property
     def angular_measurements_sigma_columns(self):
         return pd.Index(["sa", "shz", "svz", "svh"])
 
-    @property
+    @cached_property
     def measurements_columns(self):
         return self.linear_measurements_columns.union(self.angular_measurements_columns)
 
-    @property
+    @cached_property
     def measurements_sigma_columns(self):
         return self.linear_measurements_sigma_columns.union(
             self.angular_measurements_sigma_columns
         )
 
-    @property
+    @cached_property
     def linear_columns(self):
         return pd.Index(
             chain.from_iterable(
@@ -70,7 +71,7 @@ class MeasurementsSchema(StrictSchema):
             )
         )
 
-    @property
+    @cached_property
     def angular_columns(self):
         return pd.Index(
             chain.from_iterable(

@@ -38,24 +38,48 @@ class StrictSchema(PySurvSchema):
         "description": str,
     }
 
-    _indexers = {
-        "loc": StrictLocIndexer,
-        "iloc": StrictIlocIndexer,
-        "at": StrictAtIndexer,
-        "iat": StrictIatIndexer,
-    }
-
     _forbidden_methods = {
-        "where",
-        "mask",
-        "assign",
-        "update",
-        "insert",
-        "pop",
         "drop",
         "rename",
+        "insert",
+        "pop",
+        "update",
         "set_index",
         "reset_index",
+        "set_axis",
+        "reindex",
+        "reindex_like",
+        "sort_values",
+        "sort_index",
+        "dropna",
+        "fillna",
+        "replace",
+        "clip",
+        "where",
+        "mask",
+        "eval",
+        "query",
+        "assign",
+        "add_prefix",
+        "add_suffix",
+        "swaplevel",
+        "droplevel",
+        "swapaxes",
+        "transpose",
+        "T",
+        "drop_duplicates",
+        "ffill",
+        "bfill",
+        "interpolate",
+        "convert_dtypes",
+        "astype",
+        "explode",
+        "stack",
+        "unstack",
+        "pivot",
+        "pivot_table",
+        "melt",
+        "crosstab",
     }
 
     def __init__(
@@ -74,8 +98,8 @@ class StrictSchema(PySurvSchema):
     # Dunder methods
     # ----------------------------------------------------------------------------------
     def __getattr__(self, name: str) -> Any:
-        if name in self._indexers:
-            return self._indexers[name](self)
+        if name == "_model":
+            raise AttributeError("_model not initialized")
 
         attr = getattr(self._model, name, None)
         if name not in self._forbidden_methods and attr is not None:
@@ -108,6 +132,25 @@ class StrictSchema(PySurvSchema):
         self._assert_assignment(col_labels, value)
 
         self._model[key] = value
+
+    # ----------------------------------------------------------------------------------
+    # Override the pandas accesors
+    # ----------------------------------------------------------------------------------
+    @property
+    def loc(self) -> StrictLocIndexer:
+        return StrictLocIndexer(self)
+
+    @property
+    def iloc(self) -> StrictIlocIndexer:
+        return StrictIlocIndexer(self)
+
+    @property
+    def at(self) -> StrictAtIndexer:
+        return StrictAtIndexer(self)
+
+    @property
+    def iat(self) -> StrictIatIndexer:
+        return StrictIatIndexer(self)
 
     # ----------------------------------------------------------------------------------
     # Ensure strict model's structure

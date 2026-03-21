@@ -52,6 +52,9 @@ class PySurvSchema(ABC):
     # Dunder methods
     # ----------------------------------------------------------------------------------
     def __getattr__(self, name: str) -> Any:
+        if name == "_model":
+            raise AttributeError("_model not initialized")
+
         try:
             return getattr(self._model, name)
         except AttributeError:
@@ -93,6 +96,9 @@ class PySurvSchema(ABC):
     # ----------------------------------------------------------------------------------
     # Public interface
     # ----------------------------------------------------------------------------------
+    def to_data_frame(self) -> pd.DataFrame:
+        return self._model.copy(deep=True)
+
     def validate(self, data: PySurvTable) -> PySurvTable:
         """Validate data according to schema and validation mode."""
         modes = {

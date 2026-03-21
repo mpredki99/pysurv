@@ -7,6 +7,7 @@
 from copy import deepcopy
 from functools import lru_cache
 from typing import Any
+from warnings import warn
 
 from pysurv.typing.typing import AngleUnit, DistanceUnit, PySurvUnit
 from pysurv.validators.between import Between
@@ -46,20 +47,22 @@ def compile_validator(value: Any) -> Any:
         try:
             # Try to build PySurvValidator
             return deepcopy(_compile_validator(value))
-        except:
-            pass
+        except (NameError, TypeError, SyntaxError):
+            warn(f"Could not parse PySurvValidator from value: {value}")
 
     return value
 
 
 # --------------------------------------------------------------------------------------
 def compile_unit(value: Any) -> Any:
-    if isinstance(value, (str, PySurvUnit)) and value.strip():
-        try:
-            # Try to build PySurvUnit
-            return _compile_unit(value)
-        except:
-            pass
+    if isinstance(value, PySurvUnit):
+        return value
+
+    try:
+        # Try to build PySurvUnit
+        return _compile_unit(value)
+    except (ValueError, KeyError):
+        warn(f"Could not parse PySurvUnit from value: {value}")
 
     return value
 
@@ -75,11 +78,8 @@ def _compile_validator(expr: str) -> PySurvValidator:
     return eval(expr, {}, NAMESPACE)
 
 
-@lru_cache(maxsize=None)
 def _compile_unit(value: PySurvUnit | str) -> PySurvUnit:
     """Compile and cache a PySurvUnit object from a expression string."""
-    if isinstance(value, PySurvUnit):
-        return value
     try:
         return DistanceUnit(value)
     except ValueError:
