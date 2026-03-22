@@ -4,7 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-from functools import cached_property
+from collections.abc import Iterable
 from pathlib import Path
 
 import pandas as pd
@@ -20,23 +20,17 @@ class ControlsSchema(StrictSchema):
         self,
         model: pd.DataFrame | None = None,
         validation_mode: SchemaValidationMode | str = SchemaValidationMode.LAZY,
+        coordinate_columns: Iterable[str] = ["x", "y", "z"],
+        coordinate_sigma_columns: Iterable[str] = ["sx", "sy", "sz"],
     ) -> None:
         if model is None:
             model_path = self._get_controls_model_file_path()
             model = pd.read_csv(model_path)
 
+        self.coordinate_columns = pd.Index(coordinate_columns)
+        self.coordinate_sigma_columns = pd.Index(coordinate_sigma_columns)
+
         super().__init__(model, validation_mode=validation_mode)
-
-    # ----------------------------------------------------------------------------------
-    # Properties
-    # ----------------------------------------------------------------------------------
-    @cached_property
-    def coordinate_columns(self) -> pd.Index:
-        return pd.Index(["x", "y", "z"])
-
-    @cached_property
-    def coordinate_sigma_columns(self) -> pd.Index:
-        return pd.Index(["sx", "sy", "sz"])
 
     # ----------------------------------------------------------------------------------
     # Internal helpers

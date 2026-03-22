@@ -87,11 +87,13 @@ class StrictSchema(PySurvSchema):
         model: pd.DataFrame,
         validation_mode: SchemaValidationMode | str = SchemaValidationMode.LAZY,
     ) -> None:
-        object.__setattr__(self, "_initialized", False)
         super().__init__(model, validation_mode)
+
         self._row_set = set(self._model.index)
         self._col_set = set(self._model.columns)
-        object.__setattr__(self, "_initialized", True)
+
+        self._initialized = True
+
         self._assert_init_type()
 
     # ----------------------------------------------------------------------------------
@@ -110,8 +112,9 @@ class StrictSchema(PySurvSchema):
         )
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if object.__getattribute__(self, "_initialized") and not hasattr(self, name):
+        if self._is_initialized() and not hasattr(self, name):
             raise AttributeError(f"'{self.__class__.__name__}' cannot be modified")
+
         super().__setattr__(name, value)
 
     def __delattr__(self, name: str) -> None:
@@ -166,6 +169,10 @@ class StrictSchema(PySurvSchema):
     # ----------------------------------------------------------------------------------
     # Ensure strict model's structure
     # ----------------------------------------------------------------------------------
+    def _is_initialized(self) -> bool:
+        """Return flag if object has been fully initialized already."""
+        return getattr(self, "_initialized", False)
+
     def _assert_structure(
         self, labels: set[str], existing: set[str], axis: str
     ) -> None:

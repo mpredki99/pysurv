@@ -4,7 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
-from functools import cached_property
+from collections.abc import Iterable
 from pathlib import Path
 
 import pandas as pd
@@ -20,19 +20,15 @@ class StationsSchema(StrictSchema):
         self,
         model: pd.DataFrame | None = None,
         validation_mode: SchemaValidationMode | str = SchemaValidationMode.LAZY,
+        station_attribute_columns: Iterable[str] = ["stn_h", "stn_sh", "rz", "srz"],
     ) -> None:
         if model is None:
             model_path = self._get_stations_model_file_path()
             model = pd.read_csv(model_path)
 
-        super().__init__(model, validation_mode=validation_mode)
+        self.station_attribute_columns = pd.Index(station_attribute_columns)
 
-    # ----------------------------------------------------------------------------------
-    # Properties
-    # ----------------------------------------------------------------------------------
-    @cached_property
-    def station_attributes(self) -> pd.Index:
-        return pd.Index(["stn_h", "stn_sh", "rz", "srz"])
+        super().__init__(model, validation_mode=validation_mode)
 
     # ----------------------------------------------------------------------------------
     # Internal helpers

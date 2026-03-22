@@ -9,7 +9,7 @@ import pytest
 
 from pysurv.schema import StationsSchema
 
-column_properties = ["station_attributes"]
+column_properties = ["station_attribute_columns"]
 
 
 @pytest.mark.parametrize("column_property", column_properties)
