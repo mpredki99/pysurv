@@ -5,16 +5,17 @@
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
 from collections.abc import Iterable
-from pathlib import Path
 
 import pandas as pd
 
-from pysurv.schema.utils import SchemaValidationMode, get_models_dir
+from pysurv.schema.utils import SchemaValidationMode
 
-from .strict_schema import StrictSchema
+from .pysurv_table_schema import PySurvTableSchema
+
+STATIONS_MODEL_FILE_NAME = "stations_model.csv"
 
 
-class StationsSchema(StrictSchema):
+class StationsSchema(PySurvTableSchema):
 
     def __init__(
         self,
@@ -23,20 +24,9 @@ class StationsSchema(StrictSchema):
         station_attribute_columns: Iterable[str] = ["stn_h", "stn_sh", "rz", "srz"],
     ) -> None:
         if model is None:
-            model_path = self._get_stations_model_file_path()
+            model_path = self._get_model_file_path(STATIONS_MODEL_FILE_NAME)
             model = pd.read_csv(model_path)
 
         self.station_attribute_columns = pd.Index(station_attribute_columns)
 
         super().__init__(model, validation_mode=validation_mode)
-
-    # ----------------------------------------------------------------------------------
-    # Internal helpers
-    # ----------------------------------------------------------------------------------
-    def _get_stations_model_file_path(self) -> Path:
-        models_dir = get_models_dir()
-        model_path = models_dir / "stations_model.csv"
-
-        if not model_path.is_file():
-            raise FileNotFoundError(f"Stations model file not found in: {model_path}")
-        return model_path

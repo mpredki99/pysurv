@@ -10,6 +10,7 @@ from typing import Any, Tuple
 
 import pandas as pd
 
+from pysurv.configs.format_config import CSVConfig
 from pysurv.data.pysurv_table import PySurvTable
 from pysurv.exceptions._exceptions import ValidationError
 from pysurv.validators.utils import PySurvValidatorMode
@@ -41,11 +42,11 @@ class PySurvSchema(ABC):
     def from_csv(
         cls,
         path: str,
-        sep: str = ",",
-        delimiter: str | None = None,
+        config: CSVConfig | None = None,
         validation_mode: SchemaValidationMode | str = SchemaValidationMode.LAZY,
     ) -> "PySurvSchema":
-        model = pd.read_csv(path, sep=sep, delimiter=delimiter)
+        config = config or CSVConfig()
+        model = pd.read_csv(path, **config.kwargs)
         return cls(model, validation_mode=validation_mode)
 
     # ----------------------------------------------------------------------------------

@@ -7,16 +7,17 @@
 from collections.abc import Iterable
 from functools import cached_property
 from itertools import chain
-from pathlib import Path
 
 import pandas as pd
 
-from pysurv.schema.utils import SchemaValidationMode, get_models_dir
+from pysurv.schema.utils import SchemaValidationMode
 
-from .strict_schema import StrictSchema
+from .pysurv_table_schema import PySurvTableSchema
+
+MEASUREMENTS_MODEL_FILE_NAME = "measurements_model.csv"
 
 
-class MeasurementsSchema(StrictSchema):
+class MeasurementsSchema(PySurvTableSchema):
 
     def __init__(
         self,
@@ -50,7 +51,7 @@ class MeasurementsSchema(StrictSchema):
         angular_measurement_sigma_columns: Iterable[str] = ["sa", "shz", "svz", "svh"],
     ) -> None:
         if model is None:
-            model_path = self._get_measurements_model_file_path()
+            model_path = self._get_model_file_path(MEASUREMENTS_MODEL_FILE_NAME)
             model = pd.read_csv(model_path)
 
         self.target_columns = pd.Index(target_columns)
@@ -64,6 +65,14 @@ class MeasurementsSchema(StrictSchema):
         )
 
         super().__init__(model, validation_mode=validation_mode)
+
+        self._assert_column_subsets(
+            self.target_columns,
+            self.linear_measurement_columns,
+            self.linear_measurement_sigma_columns,
+            self.angular_measurement_columns,
+            self.angular_measurement_sigma_columns,
+        )
 
     # ----------------------------------------------------------------------------------
     # Properties
@@ -99,16 +108,3 @@ class MeasurementsSchema(StrictSchema):
                 )
             )
         )
-
-    # ----------------------------------------------------------------------------------
-    # Internal helpers
-    # ----------------------------------------------------------------------------------
-    def _get_measurements_model_file_path(self) -> Path:
-        models_dir = get_models_dir()
-        model_path = models_dir / "measurements_model.csv"
-
-        if not model_path.is_file():
-            raise FileNotFoundError(
-                f"Measurements model file not found in: {model_path}"
-            )
-        return model_path
