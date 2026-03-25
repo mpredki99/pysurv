@@ -44,10 +44,11 @@ class PySurvSchema(ABC):
         path: str,
         config: CSVConfig | None = None,
         validation_mode: SchemaValidationMode | str = SchemaValidationMode.LAZY,
+        **constructor_kwargs,
     ) -> "PySurvSchema":
         config = config or CSVConfig()
         model = pd.read_csv(path, **config.kwargs)
-        return cls(model, validation_mode=validation_mode)
+        return cls(model, validation_mode=validation_mode, **constructor_kwargs)
 
     # ----------------------------------------------------------------------------------
     # Dunder methods
