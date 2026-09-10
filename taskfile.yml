@@ -21,9 +21,9 @@ tasks:
  
   dev-env:
     desc: Create development environment
+    deps: [env]
     status:
       - test -f {{.VENV_NAME}}/.env-type-dev
-    deps: [env]
     cmds:
       - uv sync --group dev
       - uv run pre-commit install
@@ -51,13 +51,12 @@ tasks:
  
  
   test:
-    desc: "Run tests. Options: VERBOSE=1, COV=1 (terminal only), COV_HTML=1 (terminal + html report)"    
+    desc: "Run tests. Options: SHOW_OUTPUT=1, COV=1, COV_HTML=1"
     deps: [dev-env] 
     vars:
       PYTEST_FLAGS: >-
-        {{if .VERBOSE}}-s --override-ini="addopts=-ra -p no:warnings"{{end}}
-        {{if .COV}}--cov --cov-report=term-missing{{end}}
-        {{if .COV_HTML}}--cov --cov-report=term-missing --cov-report=html{{end}}
+        {{if .SHOW_OUTPUT}}-s{{end}}
+        {{if .COV_HTML}}--cov --cov-report=term-missing --cov-report=html{{else if .COV}}--cov --cov-report=term-missing{{end}}
     cmds:
       - uv run pytest {{.PYTEST_FLAGS}} {{.CLI_ARGS | default "tests"}}
  
