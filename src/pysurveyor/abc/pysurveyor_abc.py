@@ -119,6 +119,7 @@ class _AbstractClassAttribute:
     an abstract class attribute.
     """
 
+    # ----------------------------------------------------------------------------------
     def __repr__(self) -> str:
         return "<abstract class attribute>"
 
@@ -126,6 +127,7 @@ class _AbstractClassAttribute:
 ABSTRACT_CLASS_ATTRIBUTE = _AbstractClassAttribute()
 
 
+# --------------------------------------------------------------------------------------
 def _get_abstract_class_attributes(cls: type) -> set[str]:
     """Return abstract class attributes declared anywhere in ``cls``'s MRO.
 
