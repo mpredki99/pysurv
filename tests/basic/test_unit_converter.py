@@ -121,9 +121,9 @@ def test_dms_to_degrees_with_negative_angle():
 def test_dms_to_degrees_array():
     values = np.array(
         [
-            [  0.0,  0.0, 0.0],
-            [ 12.0, 30.0, 0.0],
-            [ 45.0, 15.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [12.0, 30.0, 0.0],
+            [45.0, 15.0, 0.0],
             [-10.0, 30.0, 0.0],
         ]
     )
@@ -153,9 +153,9 @@ def test_degrees_to_dms_array():
     values = np.array([0.0, 12.5, 45.25, -90.5])
     expected = np.array(
         [
-            [  0.0,  0.0, 0.0],
-            [ 12.0, 30.0, 0.0],
-            [ 45.0, 15.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [12.0, 30.0, 0.0],
+            [45.0, 15.0, 0.0],
             [-90.0, 30.0, 0.0],
         ]
     )
@@ -302,7 +302,6 @@ def test_conversion_invalid_units(source, target, message):
 def test_conversion_mixed_dimensions_units(source, target, message):
     with pytest.raises(AttributeError, match=message):
         getattr(getattr(convert, source).to, target)(0)
-
 
 
 # =============================================================================

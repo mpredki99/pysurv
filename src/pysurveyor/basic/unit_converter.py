@@ -1,6 +1,6 @@
 """Unit conversion utilities for angles and lengths.
 
-This module provides an API for converting between angular and linear 
+This module provides an API for converting between angular and linear
 units using NumPy-compatible numerical operations.
 
 Supported angle units
@@ -13,7 +13,7 @@ Supported angle units
 - `degrees`: decimal degrees
 - `min`: angular minutes (1/60 degree)
 - `sec`: angular seconds (1/3600 degree)
-- `dms`: degrees, minutes, and seconds represented by arrays of shape 
+- `dms`: degrees, minutes, and seconds represented by arrays of shape
   (3,) or (N, 3) - individual value is `[degrees, minutes, seconds]`
 - ``mm_over_meter``: slope expressed as millimeters per meter
 
@@ -62,36 +62,34 @@ from __future__ import annotations
 from typing import overload
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 
-
-FloatArray = NDArray[np.float64]
-
+from .utils import FloatArray, as_array, normalize_numeric_type
 
 # ======================================================================================
 # Unit conversion factors
 # ======================================================================================
 ANGLE_FACTORS: dict[str, float] = {
-    "rad":     1.0,
-    "mrad":    0.001,
-    "gon":     np.pi / 200.0,
-    "c":       np.pi / 20000.0,
-    "cc":      np.pi / 2000000.0,
+    "rad": 1.0,
+    "mrad": 0.001,
+    "gon": np.pi / 200.0,
+    "c": np.pi / 20000.0,
+    "cc": np.pi / 2000000.0,
     "degrees": np.pi / 180.0,
-    "min":     np.pi / 10800.0,
-    "sec":     np.pi / 648000.0,
+    "min": np.pi / 10800.0,
+    "sec": np.pi / 648000.0,
 }
 
 
 # ======================================================================================
 LENGTH_FACTORS: dict[str, float] = {
-    "kilometer":   1000.0,
-    "hectometer":  100.0,
-    "meter":       1.0,
-    "decimeter":   0.1,
-    "centimeter":  0.01,
+    "kilometer": 1000.0,
+    "hectometer": 100.0,
+    "meter": 1.0,
+    "decimeter": 0.1,
+    "centimeter": 0.01,
     "millimeters": 0.001,
-    "micrometer":  0.000001,
+    "micrometer": 0.000001,
     # ------------------------------
     "mile": 1609.344,
     "yard": 0.9144,
@@ -104,32 +102,15 @@ LENGTH_FACTORS: dict[str, float] = {
 # ======================================================================================
 # Conversion helper functions
 # ======================================================================================
-
-def _is_scalar(value: object) -> bool:
-    """Return whether value is a supported scalar numeric type."""
-    return isinstance(value, (int, float, np.number)) or (
-        isinstance(value, np.ndarray) and value.ndim == 0
-    )
-
-
-# ======================================================================================
-def _as_array(value: object) -> FloatArray:
-    """Convert value to a NumPy array with float64 precision."""
-    return np.asarray(value, dtype=np.float64)
-
-
-# ======================================================================================
 def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
     """Convert an angle from the specified unit to radians."""
 
     if unit == "mm_over_meter":
-        if _is_scalar(value):
-            return float(np.arctan(float(value) / 1000.0))
-        return np.arctan(_as_array(value) / 1000.0)
+        return np.arctan(normalize_numeric_type(value) / 1000.0)
 
     # ----------------------------------------------------------------------------------
     if unit == "dms":
-        array = _as_array(value)
+        array = as_array(value)
 
         if array.ndim not in (1, 2) or array.shape[-1] != 3:
             raise ValueError(
@@ -141,21 +122,14 @@ def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
             raise ValueError("DMS minutes and seconds must be non-negative.")
 
         sign = np.where(array[..., 0] < 0.0, -1.0, 1.0)
-        degrees = (
-            np.abs(array[..., 0])
-            + array[..., 1] / 60.0
-            + array[..., 2] / 3600.0
-        )
+        degrees = np.abs(array[..., 0]) + array[..., 1] / 60.0 + array[..., 2] / 3600.0
 
         return sign * degrees * ANGLE_FACTORS["degrees"]
 
     # ----------------------------------------------------------------------------------
     factor = ANGLE_FACTORS[unit]
 
-    if _is_scalar(value):
-        return float(value) * factor
-
-    return _as_array(value) * factor
+    return normalize_numeric_type(value) * factor
 
 
 # ======================================================================================
@@ -163,14 +137,11 @@ def _radians_to_angle(radians: float | FloatArray, unit: str) -> float | FloatAr
     """Convert an angle in radians to the specified target unit."""
 
     if unit == "mm_over_meter":
-        if isinstance(radians, float):
-            return float(1000.0 * np.tan(radians))
-
-        return 1000.0 * np.tan(np.asarray(radians, dtype=np.float64))
+        return 1000.0 * np.tan(normalize_numeric_type(radians))
 
     # ----------------------------------------------------------------------------------
     if unit == "dms":
-        degrees = np.asarray(radians, dtype=np.float64) / ANGLE_FACTORS["degrees"]
+        degrees = as_array(radians) / ANGLE_FACTORS["degrees"]
 
         sign = np.where(degrees < 0.0, -1.0, 1.0)
         absolute_degrees = np.abs(degrees)
@@ -187,10 +158,7 @@ def _radians_to_angle(radians: float | FloatArray, unit: str) -> float | FloatAr
     # ----------------------------------------------------------------------------------
     factor = ANGLE_FACTORS[unit]
 
-    if _is_scalar(radians):
-        return float(radians) / factor
-
-    return np.asarray(radians, dtype=np.float64) / factor
+    return normalize_numeric_type(radians) / factor
 
 
 # ======================================================================================
@@ -205,10 +173,7 @@ def _convert_length(value: object, source: str, target: str) -> float | FloatArr
     """Convert a length between supported units."""
     factor = LENGTH_FACTORS[source] / LENGTH_FACTORS[target]
 
-    if _is_scalar(value):
-        return float(value) * factor
-
-    return _as_array(value) * factor
+    return normalize_numeric_type(value) * factor
 
 
 # ======================================================================================
@@ -345,7 +310,7 @@ class _LengthTo:
     @property
     def hectometer(self) -> _Conversion:
         return _Conversion(self._source, "hectometer", "length")
-    
+
     @property
     def meter(self) -> _Conversion:
         return _Conversion(self._source, "meter", "length")
@@ -378,7 +343,7 @@ class _LengthTo:
     @property
     def feet(self) -> _Conversion:
         return _Conversion(self._source, "feet", "length")
-    
+
     @property
     def inch(self) -> _Conversion:
         return _Conversion(self._source, "inch", "length")
@@ -526,7 +491,7 @@ class _From:
     @property
     def feet(self) -> _LengthFrom:
         return _LengthFrom("feet")
-    
+
     @property
     def inch(self) -> _LengthFrom:
         return _LengthFrom("inch")
