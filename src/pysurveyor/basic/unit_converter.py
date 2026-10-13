@@ -48,9 +48,13 @@ return NumPy arrays with ``float64`` precision. DMS conversions use arrays.
 
 Raises
 ------
+AttributeError
+    If a source or target unit is invalid, or if a conversion between
+    angular and length units is attempted.
+
 ValueError
-    If a source or target unit is unsupported, or if DMS input has an
-    invalid shape or negative minutes or seconds.
+    If an unsupported dimension is specified internally, or if DMS input
+    has an invalid shape or negative minutes or seconds.
 """
 
 from __future__ import annotations
