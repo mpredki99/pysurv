@@ -1,3 +1,8 @@
+# Coding: UTF-8
+
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files.
+
 """Basic angular and coordinate utilities.
 
 This module provides angle wrapping, angular subtraction, and azimuth calculations.

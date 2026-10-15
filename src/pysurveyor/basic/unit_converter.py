@@ -1,3 +1,8 @@
+# Coding: UTF-8
+
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files.
+
 """Unit conversion utilities for angles and lengths.
 
 This module provides an API for converting between angular and linear
