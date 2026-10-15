@@ -22,7 +22,24 @@ def resolve_source(
     input: Any,
     config: IOConfig | None = None,
 ) -> Source:
-    """Automatically resolve an input into a concrete source."""
+    """Automatically resolve an input into a concrete source.
+
+    Parameters
+    ----------
+    input : Any
+        Input to resolve into a source.
+    config : IOConfig, optional
+        Configuration for the source.
+
+    Returns
+    -------
+    Source
+        Resolved source.
+    Raises
+    ------
+    TypeError
+        If the input cannot be resolved into a supported source.
+    """
     if isinstance(input, (str, PathLike)):
         return resolve_file_source(Path(input), config)
 
