@@ -1,12 +1,17 @@
+# Coding: UTF-8
+
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files in the repository.
+
 from __future__ import annotations
 
 from abc import ABC
 from typing import ClassVar, Self
 
 
-# --------------------------------------------------------------------------------------
+# ======================================================================================
 # Abstract base class for PySurveyor framework
-# --------------------------------------------------------------------------------------
+# ======================================================================================
 class PySurveyorABC(ABC):
     """Base class for PySurveyor classes that declare abstract class attributes.
 
@@ -31,7 +36,7 @@ class PySurveyorABC(ABC):
 
     __pysurveyor_abstract__: ClassVar[bool] = True
 
-    # ----------------------------------------------------------------------------------
+    # ==================================================================================
     def __new__(cls, *args: object, **kwargs: object) -> Self:
         """Create an instance of a concrete PySurveyor class.
 
@@ -64,7 +69,7 @@ class PySurveyorABC(ABC):
 
         return super().__new__(cls)
 
-    # ----------------------------------------------------------------------------------
+    # ==================================================================================
     def __init_subclass__(cls, **kwargs: object) -> None:
         """Validate abstract class attributes when a subclass is created.
 
@@ -108,9 +113,9 @@ class PySurveyorABC(ABC):
             )
 
 
-# --------------------------------------------------------------------------------------
+# ======================================================================================
 # Abstract class attribute utilities
-# --------------------------------------------------------------------------------------
+# ======================================================================================
 class _AbstractClassAttribute:
     """Sentinel used to mark a class attribute as abstract.
 
@@ -119,7 +124,7 @@ class _AbstractClassAttribute:
     an abstract class attribute.
     """
 
-    # ----------------------------------------------------------------------------------
+    # ==================================================================================
     def __repr__(self) -> str:
         return "<abstract class attribute>"
 
@@ -127,7 +132,7 @@ class _AbstractClassAttribute:
 ABSTRACT_CLASS_ATTRIBUTE = _AbstractClassAttribute()
 
 
-# --------------------------------------------------------------------------------------
+# ======================================================================================
 def _get_abstract_class_attributes(cls: type) -> set[str]:
     """Return abstract class attributes declared anywhere in ``cls``'s MRO.
 
