@@ -14,6 +14,11 @@ from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from pysurveyor.io.abc.pysurveyor_io import PySurveyorABC
+    from pysurveyor.io.config.abc.config import IOConfig
 
 
+# ======================================================================================
 DomainClassType = TypeVar("DomainClassType", bound="PySurveyorABC")
+
+# ======================================================================================
+ConfigType = TypeVar("ConfigType", bound="IOConfig")
