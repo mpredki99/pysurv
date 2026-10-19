@@ -42,7 +42,7 @@ class Schema(Table[LoaderType]):
     __pysurveyor_abstract__ = True
 
     # ==================================================================================
-    parse = cast(ParserAccessor[SchemaParser], ABSTRACT_CLASS_ATTRIBUTE)
+    parse = cast(ParserAccessor[SchemaParser[Self]], ABSTRACT_CLASS_ATTRIBUTE)
 
     # ==================================================================================
     def __init__(
