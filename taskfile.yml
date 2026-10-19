@@ -3,7 +3,7 @@ version: "3"
 silent: true
  
 vars:
-  PYTHON_VERSION: '{{.PYTHON_VERSION | default "3.14"}}'
+  PYTHON_VERSION: '{{.PYTHON_VERSION | default "3.12"}}'
   VENV_NAME: ".venv"
  
 
