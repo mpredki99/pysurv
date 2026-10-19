@@ -10,11 +10,13 @@ throughout the PySurveyor framework.
 """
 
 from pysurveyor.typing.vars import (
-    ConfigType,
     DomainClassType,
+    LoaderType,
+    SchemaParserType,
 )
 
 __all__ = [
-    "ConfigType",
+    "LoaderType",
+    "SchemaParserType",
     "DomainClassType",
 ]
