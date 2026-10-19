@@ -64,7 +64,7 @@ class PySurveyorABC(ABC):
         here to prevent direct instantiation of classes explicitly marked as
         abstract.
         """
-        if cls.__dict__.get("__pysurveyor_abstract__", False):
+        if is_pysurveyor_abstract(cls):
             raise TypeError(f"Can't instantiate abstract class {cls.__name__}")
 
         return super().__new__(cls)
@@ -93,7 +93,7 @@ class PySurveyorABC(ABC):
         """
         super().__init_subclass__(**kwargs)
 
-        if cls.__dict__.get("__pysurveyor_abstract__", False):
+        if is_pysurveyor_abstract(cls):
             return
 
         abstract_attributes = _get_abstract_class_attributes(cls)
@@ -159,3 +159,22 @@ def _get_abstract_class_attributes(cls: type) -> set[str]:
         for attribute_name, value in base_class.__dict__.items()
         if value is ABSTRACT_CLASS_ATTRIBUTE
     }
+
+
+# ======================================================================================
+# Public function to check whether a class is PySurveyor abstract
+# ======================================================================================
+def is_pysurveyor_abstract(cls: type) -> bool:
+    """Determine whether a class is abstract in terms of PySurveyor.
+
+    Parameters
+    ----------
+    cls
+        Class to check for abstract status.
+
+    Returns
+    -------
+    bool
+        ``True`` if ``cls`` is abstract, ``False`` otherwise.
+    """
+    return cls.__dict__.get("__pysurveyor_abstract__", False)
