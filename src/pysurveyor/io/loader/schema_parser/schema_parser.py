@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
+from ast import pattern
 from collections.abc import Iterable, Iterator
+from email.mime import text
 from os import PathLike
 from pathlib import Path
 import re
@@ -19,6 +21,17 @@ from pysurveyor.io.source.abc.source import Source
 from pysurveyor.io.source.file_sources import CSVSource
 from pysurveyor.io.source.resolver import resolve_source
 from pysurveyor.typing.vars import SchemaType
+
+# ======================================================================================
+# Header patterns compiled once
+# ======================================================================================
+_HEADER_PATTERNS = {
+    "required": re.compile(r"!([^!]+)!"),
+    "optional": re.compile(r"\?([^?]+)\?"),
+    "unit": re.compile(r"\[([^\]]+)\]"),
+    "validator": re.compile(r"`([^`]*)`"),
+    "description": re.compile(r"\(([^()]*)\)"),
+}
 
 
 # ======================================================================================
@@ -97,14 +110,15 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
         model = schema._model
 
         # ------------------------------------------------------------------------------
-        if "field" not in model.columns:
-            raise ValueError("Schema model must contain a 'field' column")
+        if model.index.name != "field":
+            raise ValueError("Schema model must have index named 'field'")
 
         # ------------------------------------------------------------------------------
         parsed_header_fields = self._parse_header_fields(header)
 
         for field, required, unit, validator, description in parsed_header_fields:
-            if field not in model["field"].values:
+
+            if field not in model.index:
                 raise ValueError(f"Field '{field}' not found in schema model")
 
             if required is not None:
@@ -125,32 +139,111 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
     def _parse_header_fields(
         self, header: Iterable[str]
     ) -> Iterator[tuple[str, bool | None, str | None, str | None, str | None]]:
-        """Parse a header and yield field information.
+        """Parse header fields.
 
-        Parameters
-        ----------
-        header : Iterable[str]
-            The header to parse.
+        Supported annotations
+        ---------------------
+        !field!       Required field
+        ?field?       Optional field
+        [unit]        Unit
+        `validator`   Validator expression
+        (description) Field description
 
-        Yields
-        ------
-        tuple[str, bool | None, str | None, str | None, str | None]
-            A tuple of the field name, required, unit, validator, and description.
+        Annotations may appear in any order, with arbitrary whitespace.
         """
         for header_field in header:
-            field = ""  # TODO: Retreive the field name from the header_field, e.g. "!field! [unit] `validator` (description)" -> "field"
+            remaining = header_field.strip()
 
-            required = None  # TODO: Retreive the field name from the header_field, e.g. "!field! [unit] `validator` (description)" -> True
-            required = None  # TODO: Retreive the field name from the header_field, e.g. "?field? [unit] `validator` (description)" -> False
-            required = None  # TODO: Retreive the field name from the header_field, e.g. "field [unit] `validator` (description)" -> None
+            # --------------------------------------------------------------------------
+            # Extract the required/optional marker
+            # --------------------------------------------------------------------------
+            remaining, required_match = self._extract_header_component(
+                remaining,
+                _HEADER_PATTERNS["required"],
+                "required marker",
+                preserve_value=True,
+            )
+            remaining, optional_match = self._extract_header_component(
+                remaining,
+                _HEADER_PATTERNS["optional"],
+                "optional marker",
+                preserve_value=True,
+            )
 
-            unit = None  # TODO: Retreive the field name from the header_field, e.g. "!field! [unit] `validator` (description)" -> "unit"
-            unit = None  # TODO: Retreive the field name from the header_field, e.g. "!field! `validator` (description)" -> None
+            if required_match is not None and optional_match is not None:
+                raise ValueError(
+                    "Header field cannot be both required and optional: "
+                    f"{header_field!r}"
+                )
 
-            validator = None  # TODO: Retreive the field name from the header_field, e.g. "!field! `validator` (description)" -> "validator"
-            validator = None  # TODO: Retreive the field name from the header_field, e.g. "!field! `validator` (description)" -> None
+            required = (
+                True
+                if required_match is not None
+                else False if optional_match is not None else None
+            )
 
-            description = None  # TODO: Retreive the field name from the header_field, e.g. "!field! `validator` (description)" -> "description"
-            description = None  # TODO: Retreive the field name from the header_field, e.g. "!field! `validator`" -> None
+            # --------------------------------------------------------------------------
+            # Extract the unit
+            # --------------------------------------------------------------------------
+            remaining, unit = self._extract_header_component(
+                remaining, _HEADER_PATTERNS["unit"], "unit"
+            )
 
+            # --------------------------------------------------------------------------
+            # Extract the validator
+            # --------------------------------------------------------------------------
+            remaining, validator = self._extract_header_component(
+                remaining, _HEADER_PATTERNS["validator"], "validator"
+            )
+
+            # --------------------------------------------------------------------------
+            # Extract the description
+            # --------------------------------------------------------------------------
+            remaining, description = self._extract_header_component(
+                remaining, _HEADER_PATTERNS["description"], "description"
+            )
+
+            # --------------------------------------------------------------------------
+            # Remove whitespace and separating annotations to get the field name
+            # --------------------------------------------------------------------------
+            field = remaining.strip().strip(",;").strip()
+
+            if not field:
+                raise ValueError(f"Missing field name in header: {header_field!r}")
+
+            # --------------------------------------------------------------------------
             yield field, required, unit, validator, description
+
+    # ==================================================================================
+    @staticmethod
+    def _extract_header_component(
+        text: str,
+        pattern: re.Pattern[str],
+        component: str,
+        preserve_value: bool = False,
+    ) -> tuple[str, str | None]:
+        """Extract a single annotation and return the remaining text.
+
+        If preserve_value is True, retain the captured value in the text.
+
+        Raises
+        ------
+        ValueError
+            If multiple annotations of the same kind occur.
+        """
+        match = pattern.search(text)
+
+        # ------------------------------------------------------------------------------
+        if match is None:
+            return text, None
+
+        # ------------------------------------------------------------------------------
+        if pattern.search(text, match.end()) is not None:
+            raise ValueError(f"Multiple {component} annotations in header: {text!r}")
+
+        # ------------------------------------------------------------------------------
+        value = match.group(1).strip()
+        replacement = value if preserve_value else ""
+        remaining = text[: match.start()] + replacement + text[match.end() :]
+
+        return remaining, value
