@@ -21,15 +21,22 @@ from pysurveyor.typing.vars import DataTableType, SchemaType
 # Abstract base class for data-table loaders
 # ======================================================================================
 class DataTableLoader(TableLoader[DataTableType], Generic[DataTableType, SchemaType]):
-    """Base loader for PySurveyor data tables.
+    """Base loader for PySurveyor data-table objects.
 
-    ``DataTableType`` identifies the concrete table returned by the loader.
-    ``SchemaType`` identifies the schema accepted by the loader and forwarded
-    to :meth:`from_csv`.
+    This abstract base class defines the interface for loaders that construct
+    data tables associated with schemas. It resolves supported source types
+    and delegates format-specific loading to concrete implementations.
 
-    The source dispatch implemented here supports :class:`CSVSource`.
-    Concrete subclasses implement the actual CSV reading and construction of
-    the data-table object.
+    The generic parameters specify the type of table returned by the loader
+    and the schema type accepted by its loading methods.
+
+    Parameters
+    ----------
+    DataTableType
+        Concrete data-table type returned by the loader.
+    SchemaType
+        Schema type accepted by the loader and passed to the format-specific
+        loading implementation.
     """
 
     __pysurveyor_abstract__ = True
@@ -43,28 +50,31 @@ class DataTableLoader(TableLoader[DataTableType], Generic[DataTableType, SchemaT
         config: IOConfig | None = None,
         **kwargs: Any,
     ) -> DataTableType:
-        """Load a data table with a schema.
+        """Load a data table from a source.
 
-        This override only specializes the public signature for data-table
-        loaders. Dispatch, source resolution, and forwarding remain owned by
-        :meth:`TableLoader.__call__`.
+        Delegates source resolution and loading orchestration to
+        :meth:`TableLoader.__call__`, forwarding the schema, configuration,
+        and additional keyword arguments.
 
         Parameters
         ----------
         source : Any
-            Data source to load, resolved automatically when necessary.
-        schema : SchemaType, optional
-            Schema used to interpret or validate the data.
+            Data source to load from, resolved automatically.
+        schema : SchemaType or None, default=None
+            Schema to associate with or use when interpreting the loaded data.
+            If ``None``, schema selection is delegated to the concrete loader
+            or data-table implementation.
         config : IOConfig, optional
-            Configuration used when resolving a path-like source. Concrete
-            CSV loaders expect a ``CSVConfig`` instance.
-        **kwargs
-            Additional arguments forwarded to the concrete loader.
+            Configuration of the reading the source. If ``source`` is already
+            a :class:`Source`, its config object is used.
+        **kwargs : Any
+            Additional keyword arguments forwarded to the inherited loading
+            implementation.
 
         Returns
         -------
         DataTableType
-            Data-table object created by the concrete loader.
+            Data-table instance created by the concrete loader.
         """
         return super().__call__(source, schema=schema, config=config, **kwargs)
 
@@ -75,16 +85,16 @@ class DataTableLoader(TableLoader[DataTableType], Generic[DataTableType, SchemaT
         schema: SchemaType | None = None,
         **kwargs: Any,
     ) -> DataTableType:
-        """Load a data table from a supported resolved source.
+        """Load a data table from a supported source.
 
         Parameters
         ----------
         source : Source
-            Resolved source describing the input data.
+            Source describing the input data and its configuration.
         schema : SchemaType, optional
             Schema used to interpret or validate the data.
         **kwargs
-            Additional arguments forwarded to :meth:`from_csv`.
+            Additional arguments forwarded to source specific loading methods.
 
         Returns
         -------
