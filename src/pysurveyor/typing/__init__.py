@@ -10,13 +10,17 @@ throughout the PySurveyor framework.
 """
 
 from pysurveyor.typing.vars import (
+    DataTableType,
     DomainClassType,
     LoaderType,
     SchemaParserType,
+    SchemaType,
 )
 
 __all__ = [
+    "DataTableType",
+    "DomainClassType",
     "LoaderType",
     "SchemaParserType",
-    "DomainClassType",
+    "SchemaType",
 ]

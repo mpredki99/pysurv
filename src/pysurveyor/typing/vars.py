@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, TypeVar
 
 if TYPE_CHECKING:
+    from pysurveyor.data.abc.datatable import DataTable
     from pysurveyor.io.abc.pysurveyor_io import PySurveyorIO
     from pysurveyor.io.config.abc.config import IOConfig
     from pysurveyor.io.loader.abc.pysurveyor_loader import PySurveyorLoader
@@ -26,6 +27,7 @@ SchemaParserType = TypeVar("SchemaParserType", bound="SchemaParser[Any]")
 
 # ======================================================================================
 DomainClassType = TypeVar("DomainClassType", bound="PySurveyorIO[Any]")
+DataTableType = TypeVar("DataTableType", bound="DataTable")
 SchemaType = TypeVar("SchemaType", bound="Schema")
 
 # ======================================================================================
