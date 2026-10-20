@@ -10,6 +10,7 @@ from typing import Any
 from pysurveyor.io.config.abc.config import IOConfig
 from pysurveyor.io.loader.abc.constructor_bound_loader import ConstructorBoundLoader
 from pysurveyor.io.source.abc.source import Source
+from pysurveyor.io.source.file_sources import CSVSource
 from pysurveyor.io.source.resolver import resolve_source
 from pysurveyor.typing.vars import DomainClassType
 
@@ -57,3 +58,33 @@ class TableLoader(ConstructorBoundLoader[DomainClassType]):
             resolved_source = resolve_source(source, config=config)
 
         return self.from_source(resolved_source, **kwargs)
+
+    # ==================================================================================
+    def from_source(
+        self,
+        source: Source,
+        **kwargs: Any,
+    ) -> DomainClassType:
+        """Load a domain object from a supported source.
+
+        Parameters
+        ----------
+        source : Source
+            Source describing the domain object input and its configuration.
+        **kwargs
+            Additional arguments forwarded to source specific loading methods.
+
+        Returns
+        -------
+        DomainClassType
+            Domain object created by the concrete loader.
+
+        Raises
+        ------
+        TypeError
+            If ``source`` is not a supported source type.
+        """
+        if isinstance(source, CSVSource):
+            return self.from_csv(source.path, config=source.config, **kwargs)
+
+        raise TypeError(f"Unsupported source type: {type(source)}")

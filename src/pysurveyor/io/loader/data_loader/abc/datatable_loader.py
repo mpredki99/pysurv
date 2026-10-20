@@ -13,7 +13,6 @@ from pysurveyor.io.config.abc.config import IOConfig
 from pysurveyor.io.config.file_configs import CSVConfig
 from pysurveyor.io.loader.abc.table_loader import TableLoader
 from pysurveyor.io.source.abc.source import Source
-from pysurveyor.io.source.file_sources import CSVSource
 from pysurveyor.typing.vars import DataTableType, SchemaType
 
 
@@ -82,6 +81,7 @@ class DataTableLoader(TableLoader[DataTableType], Generic[DataTableType, SchemaT
     def from_source(
         self,
         source: Source,
+        *,
         schema: SchemaType | None = None,
         **kwargs: Any,
     ) -> DataTableType:
@@ -106,24 +106,4 @@ class DataTableLoader(TableLoader[DataTableType], Generic[DataTableType, SchemaT
         TypeError
             If ``source`` is not a supported source type.
         """
-        if isinstance(source, CSVSource):
-            return self.from_csv(
-                source.path,
-                schema=schema,
-                config=source.config,
-                **kwargs,
-            )
-
-        raise TypeError(f"Unsupported source type: {type(source)}")
-
-    # ==================================================================================
-    @abstractmethod
-    def from_csv(
-        self,
-        path: PathLike[str] | str,
-        schema: SchemaType | None = None,
-        config: CSVConfig | None = None,
-        **kwargs: Any,
-    ) -> DataTableType:
-        """Load a data table from a CSV file."""
-        pass
+        return super().from_source(source, schema=schema, **kwargs)
