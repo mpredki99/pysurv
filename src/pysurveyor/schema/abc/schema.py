@@ -13,7 +13,7 @@ from pysurveyor.backend.backend import DataFrame
 from pysurveyor.io.abc.table import Table
 from pysurveyor.io.accessors.parser_accessor import ParserAccessor
 from pysurveyor.io.loader.schema_parser.schema_parser import SchemaParser
-from pysurveyor.schema.utils.validation_model import ValidationMode
+from pysurveyor.schema.utils.validation_mode import ValidationMode
 from pysurveyor.typing.vars import LoaderType
 
 if TYPE_CHECKING:
