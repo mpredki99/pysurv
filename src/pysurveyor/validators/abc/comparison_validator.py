@@ -27,6 +27,7 @@ class ComparisonValidator(Validator):
     __pysurveyor_abstract__ = True
 
     _operator = cast(Callable, ABSTRACT_CLASS_ATTRIBUTE)
+    _operator_error_str = cast(str, ABSTRACT_CLASS_ATTRIBUTE)
 
     # ==================================================================================
     # Dunder methods
@@ -68,7 +69,11 @@ class ComparisonValidator(Validator):
 
         valid_mask = ignored | comparison
 
-        return self._return_validation_result(valid_mask, data)
+        return self._return_validation_result(
+            valid_mask,
+            data,
+            error_message=f"Found values {self._operator_error_str} {self.threshold}:",
+        )
 
     # ==================================================================================
     # Properties

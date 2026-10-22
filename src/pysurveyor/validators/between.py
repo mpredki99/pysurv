@@ -14,6 +14,7 @@ from pysurveyor.validators.comparison_validators import (
     Less,
     LessOrEqual,
 )
+from pysurveyor.validators.conversion_validators import IsNumeric
 from pysurveyor.validators.utils.constants import COMMENT
 from pysurveyor.validators.utils.validator_mode import ValidatorMode
 
@@ -54,16 +55,15 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         self._minimum = float(minimum)
         self._maximum = float(maximum)
-        self._inclusive = self._validate_inclusive(inclusive)
 
         # ------------------------------------------------------------------------------
         if self._minimum > self._maximum:
             raise ValueError("minimum cannot be greater than maximum")
 
         # ------------------------------------------------------------------------------
-        self._validator = self._build_validator()
+        self._inclusive = self._validate_inclusive(inclusive)
+        self._is_numeric = IsNumeric(mode="return")
 
-    # ==================================================================================
     def __str__(self) -> str:
         """Return the validator name, limits, and inclusivity mode."""
         return (
@@ -74,25 +74,36 @@ class Between(Validator):
     # ==================================================================================
     def __call__(self, data: Series) -> tuple[Series, Series]:
         """Validate ``data`` using the configured numeric range."""
-        return self._validator(data)
+        if data.empty:
+            return self._return_empty(int, data.index)
+
+        # ------------------------------------------------------------------------------
+        ignored = self._ignored_mask(data)
+        numeric = self._is_numeric(data)[0]
+        comparable = ~ignored & numeric
+
+        # ------------------------------------------------------------------------------
+        valid_mask = ignored.copy()
+
+        if comparable.any():
+            valid_mask.loc[comparable] = self._validator(data.loc[comparable])[0]
+
+        # ------------------------------------------------------------------------------
+        error_message = (
+            f"Non-numeric data found:"
+            if (~ignored & ~numeric).any()
+            else f"Data out of range in:"
+        )
+
+        # ------------------------------------------------------------------------------
+        return self._return_validation_result(
+            valid_mask,
+            data,
+            error_message=error_message,
+        )
 
     # ==================================================================================
     # Properties
-    # ==================================================================================
-    @Validator.mode.setter
-    def mode(self, value: ValidatorMode | str) -> None:
-        """Set this validator's mode and propagate it to its range checks."""
-        setter = Validator.mode.fset
-
-        # ------------------------------------------------------------------------------
-        if setter is None:
-            raise AttributeError("Validator.mode does not define a setter")
-        setter(self, value)
-
-        # ------------------------------------------------------------------------------
-        if hasattr(self, "_validator"):
-            self._validator.mode = self._mode
-
     # ==================================================================================
     @property
     def inclusive(self) -> Inclusivity:
@@ -107,7 +118,6 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._inclusive:
             self._inclusive = value
-            self._refresh_validator()
 
     # ==================================================================================
     @property
@@ -127,7 +137,6 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._minimum:
             self._minimum = value
-            self._refresh_validator()
 
     # ==================================================================================
     @property
@@ -147,7 +156,6 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._maximum:
             self._maximum = value
-            self._refresh_validator()
 
     # ==================================================================================
     # Private methods
@@ -162,21 +170,17 @@ class Between(Validator):
         return cast(Inclusivity, value)
 
     # ==================================================================================
-    def _build_validator(self) -> Validator:
-        """Build the range validator from the current configuration."""
-        left_cls, right_cls = _RANGE_OPERATORS[self._inclusive]
+    @property
+    def _validator(self) -> Validator:
+        """Return a composite validator based on the configured range and inclusivity."""
+        left_op, right_op = _RANGE_OPERATORS[self._inclusive]
 
         # ------------------------------------------------------------------------------
-        validator = left_cls(self._minimum, ignore=self.ignore) & right_cls(
-            self._maximum, ignore=self.ignore
-        )
-        validator.mode = self._mode
+        left = left_op(self._minimum, ignore=self._ignore)
+        right = right_op(self._maximum, ignore=self._ignore)
 
         # ------------------------------------------------------------------------------
+        validator = left & right
+        validator.mode = ValidatorMode.RETURN
+
         return validator
-
-    # ==================================================================================
-    def _refresh_validator(self) -> None:
-        """Rebuild the range validator after a configuration change."""
-        if hasattr(self, "_validator"):
-            self._validator = self._build_validator()

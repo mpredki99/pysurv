@@ -41,6 +41,7 @@ class Validator(PySurveyorABC):
         """Initialize ignore rules and choose how validation results are handled."""
         super().__init__()
         # ------------------------------------------------------------------------------
+        self._ignore = ignore
         self._ignore_na = False
         self._ignore_literals: set[Any] = set()
         self._ignore_regexes: list[re.Pattern] = []
@@ -96,7 +97,12 @@ class Validator(PySurveyorABC):
     # Properties
     # ==================================================================================
     @property
-    def ignore(self) -> dict[str, Any]:
+    def ignore(self) -> Iterable[Any] | Any:
+        """Return the configured ignore rules."""
+        return self._ignore
+
+    @property
+    def ignore_dict(self) -> dict[str, Any]:
         """Expose configured ignore rules grouped by rule type."""
         ignored = {}
 

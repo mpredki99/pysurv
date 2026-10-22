@@ -4,7 +4,7 @@
 # Full text of the license can be found in the LICENSE and COPYING files.
 
 from abc import abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from pysurveyor.backend.backend import Series
 from pysurveyor.validators.abc.validator import Validator
@@ -17,11 +17,14 @@ class ConversionValidator(Validator):
     """Base class for validators that validate values and converting their type.
 
     Concrete validators provide the output dtype, the value used for ignored
-    entries, and the conversion operation. A conversion is considered valid
-    when it produces a non-missing value.
+    entries, and the conversion operation. A conversion is valid when it
+    produces a non-missing value.
     """
 
     __pysurveyor_abstract__ = True
+
+    _output_dtype: ClassVar[type | str]
+    _fill_value: ClassVar[Any]
 
     # ==================================================================================
     # Dunder methods
@@ -47,21 +50,7 @@ class ConversionValidator(Validator):
         )
 
     # ==================================================================================
-    # Abstract properties and methods
-    # ==================================================================================
-    @property
-    @abstractmethod
-    def _output_dtype(self) -> type | str:
-        """Dtype used when creating the converted Series for empty input."""
-        pass
-
-    # ==================================================================================
-    @property
-    @abstractmethod
-    def _fill_value(self) -> Any:
-        """Value assigned to entries excluded by the ignore rules."""
-        pass
-
+    # Conversion implementation
     # ==================================================================================
     @abstractmethod
     def _convert(self, data: Series) -> Series:

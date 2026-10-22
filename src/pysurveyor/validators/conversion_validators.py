@@ -13,18 +13,8 @@ from pysurveyor.validators.abc.conversion_validator import ConversionValidator
 class IsNumeric(ConversionValidator):
     """Validate and convert values to a numeric Series."""
 
-    # ==================================================================================
-    # Conversion configuration
-    # ==================================================================================
-    @property
-    def _output_dtype(self) -> type:
-        """Return the dtype used for empty converted Series."""
-        return int
-
-    @property
-    def _fill_value(self) -> float:
-        """Return the missing value used for ignored entries."""
-        return float("nan")
+    _output_dtype = int
+    _fill_value = float("nan")
 
     # ==================================================================================
     def _convert(self, data: Series) -> Series:
@@ -38,18 +28,8 @@ class IsNumeric(ConversionValidator):
 class IsText(ConversionValidator):
     """Validate and convert values to a text Series."""
 
-    # ==================================================================================
-    # Conversion configuration
-    # ==================================================================================
-    @property
-    def _output_dtype(self) -> str:
-        """Return the dtype used for empty converted Series."""
-        return "str"
-
-    @property
-    def _fill_value(self) -> object:
-        """Return the missing value used for ignored entries."""
-        return NA
+    _output_dtype = "str"
+    _fill_value = NA
 
     # ==================================================================================
     def _convert(self, data: Series) -> Series:
