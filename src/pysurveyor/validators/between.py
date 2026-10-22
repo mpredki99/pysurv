@@ -63,6 +63,7 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         self._inclusive = self._validate_inclusive(inclusive)
         self._is_numeric = IsNumeric(mode="return")
+        self._validator_cache = None
 
     def __str__(self) -> str:
         """Return the validator name, limits, and inclusivity mode."""
@@ -80,6 +81,8 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         ignored = self._ignored_mask(data)
         numeric = self._is_numeric(data)[0]
+
+        non_numeric = ~ignored & ~numeric
         comparable = ~ignored & numeric
 
         # ------------------------------------------------------------------------------
@@ -91,7 +94,7 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         error_message = (
             f"Non-numeric data found:"
-            if (~ignored & ~numeric).any()
+            if non_numeric.any()
             else f"Data out of range in:"
         )
 
@@ -118,6 +121,7 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._inclusive:
             self._inclusive = value
+            self._validator_cache = None
 
     # ==================================================================================
     @property
@@ -137,6 +141,7 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._minimum:
             self._minimum = value
+            self._validator_cache = None
 
     # ==================================================================================
     @property
@@ -156,6 +161,7 @@ class Between(Validator):
         # ------------------------------------------------------------------------------
         if value != self._maximum:
             self._maximum = value
+            self._validator_cache = None
 
     # ==================================================================================
     # Private methods
@@ -173,14 +179,18 @@ class Between(Validator):
     @property
     def _validator(self) -> Validator:
         """Return a composite validator based on the configured range and inclusivity."""
-        left_op, right_op = _RANGE_OPERATORS[self._inclusive]
+        if self._validator_cache is None:
 
-        # ------------------------------------------------------------------------------
-        left = left_op(self._minimum, ignore=self._ignore)
-        right = right_op(self._maximum, ignore=self._ignore)
+            left_op, right_op = _RANGE_OPERATORS[self._inclusive]
 
-        # ------------------------------------------------------------------------------
-        validator = left & right
-        validator.mode = ValidatorMode.RETURN
+            # --------------------------------------------------------------------------
+            left = left_op(self._minimum, ignore=self._ignore)
+            right = right_op(self._maximum, ignore=self._ignore)
 
-        return validator
+            # --------------------------------------------------------------------------
+            validator = left & right
+            validator.mode = ValidatorMode.RETURN
+
+            self._validator_cache = validator
+
+        return self._validator_cache
