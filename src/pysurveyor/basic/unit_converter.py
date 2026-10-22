@@ -80,9 +80,9 @@ ANGLE_FACTORS: dict[str, float] = {
     "gon": np.pi / 200.0,
     "c": np.pi / 20000.0,
     "cc": np.pi / 2000000.0,
-    "degrees": np.pi / 180.0,
-    "min": np.pi / 10800.0,
-    "sec": np.pi / 648000.0,
+    "degree": np.pi / 180.0,
+    "arcmin": np.pi / 10800.0,
+    "arcsec": np.pi / 648000.0,
 }
 
 
@@ -93,7 +93,7 @@ LENGTH_FACTORS: dict[str, float] = {
     "meter": 1.0,
     "decimeter": 0.1,
     "centimeter": 0.01,
-    "millimeters": 0.001,
+    "millimeter": 0.001,
     "micrometer": 0.000001,
     # ------------------------------
     "mile": 1609.344,
@@ -120,7 +120,7 @@ def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
         if array.ndim not in (1, 2) or array.shape[-1] != 3:
             raise ValueError(
                 "DMS input must have shape (3,) or (N, 3): "
-                "[degrees, minutes, seconds]."
+                "[degrees, arcminutes, arcseconds]."
             )
 
         if np.any(array[..., 1:] < 0.0):
@@ -129,7 +129,7 @@ def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
         sign = np.where(array[..., 0] < 0.0, -1.0, 1.0)
         degrees = np.abs(array[..., 0]) + array[..., 1] / 60.0 + array[..., 2] / 3600.0
 
-        return sign * degrees * ANGLE_FACTORS["degrees"]
+        return sign * degrees * ANGLE_FACTORS["degree"]
 
     # ----------------------------------------------------------------------------------
     factor = ANGLE_FACTORS[unit]
@@ -146,7 +146,7 @@ def _radians_to_angle(radians: float | FloatArray, unit: str) -> float | FloatAr
 
     # ----------------------------------------------------------------------------------
     if unit == "dms":
-        degrees = as_array(radians) / ANGLE_FACTORS["degrees"]
+        degrees = as_array(radians) / ANGLE_FACTORS["degree"]
 
         sign = np.where(degrees < 0.0, -1.0, 1.0)
         absolute_degrees = np.abs(degrees)
@@ -274,16 +274,16 @@ class _AngleTo:
 
     # ==================================================================================
     @property
-    def degrees(self) -> _Conversion:
-        return _Conversion(self._source, "degrees", "angle")
+    def degree(self) -> _Conversion:
+        return _Conversion(self._source, "degree", "angle")
 
     @property
-    def min(self) -> _Conversion:
-        return _Conversion(self._source, "min", "angle")
+    def arcmin(self) -> _Conversion:
+        return _Conversion(self._source, "arcmin", "angle")
 
     @property
-    def sec(self) -> _Conversion:
-        return _Conversion(self._source, "sec", "angle")
+    def arcsec(self) -> _Conversion:
+        return _Conversion(self._source, "arcsec", "angle")
 
     @property
     def dms(self) -> _Conversion:
@@ -329,8 +329,8 @@ class _LengthTo:
         return _Conversion(self._source, "centimeter", "length")
 
     @property
-    def millimeters(self) -> _Conversion:
-        return _Conversion(self._source, "millimeters", "length")
+    def millimeter(self) -> _Conversion:
+        return _Conversion(self._source, "millimeter", "length")
 
     @property
     def micrometer(self) -> _Conversion:
@@ -438,16 +438,16 @@ class _From:
 
     # ==================================================================================
     @property
-    def degrees(self) -> _AngleFrom:
-        return _AngleFrom("degrees")
+    def degree(self) -> _AngleFrom:
+        return _AngleFrom("degree")
 
     @property
-    def min(self) -> _AngleFrom:
-        return _AngleFrom("min")
+    def arcmin(self) -> _AngleFrom:
+        return _AngleFrom("arcmin")
 
     @property
-    def sec(self) -> _AngleFrom:
-        return _AngleFrom("sec")
+    def arcsec(self) -> _AngleFrom:
+        return _AngleFrom("arcsec")
 
     @property
     def dms(self) -> _AngleFrom:
@@ -477,8 +477,8 @@ class _From:
         return _LengthFrom("centimeter")
 
     @property
-    def millimeters(self) -> _LengthFrom:
-        return _LengthFrom("millimeters")
+    def millimeter(self) -> _LengthFrom:
+        return _LengthFrom("millimeter")
 
     @property
     def micrometer(self) -> _LengthFrom:
