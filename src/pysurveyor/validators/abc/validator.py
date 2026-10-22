@@ -164,6 +164,7 @@ class Validator(PySurveyorABC):
                 literals.add(value)
 
         # ------------------------------------------------------------------------------
+        self._ignore = values
         self._ignore_na = ignore_na
         self._ignore_literals = literals
         self._ignore_regexes = regexes
