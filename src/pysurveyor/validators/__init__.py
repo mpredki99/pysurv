@@ -7,11 +7,12 @@
 from . import abc
 from .between import Between
 from .comparison_validators import Equal, Greater, GreaterOrEqual, Less, LessOrEqual
-from .conversion_validators import IsNumeric, IsText
+from .conversion_validators import IsBoolean, IsNumeric, IsText
 
 __all__ = [
     "abc",
     "IsNumeric",
+    "IsBoolean",
     "IsText",
     "Between",
     "Greater",

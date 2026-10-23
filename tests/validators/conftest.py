@@ -51,6 +51,21 @@ def numeric_data() -> SimpleNamespace:
 
 
 # ======================================================================================
+@pytest.fixture
+def boolean_data() -> SimpleNamespace:
+    """Return boolean Series used by ``IsBoolean`` tests."""
+    return SimpleNamespace(
+        empty=_empty(),
+        valid=Series([True, False, True, False, True, False]),
+        invalid=Series(["A", "B", "C", "D", 1.01, 3.5, 0.99]),
+        convertible=Series([1, 0, True, False, 1.0, 0.0]),
+        with_empty=Series([True, None, NA, False, True, False]),
+        regex=Series([True, False, "# comment", "  # leading space", "\t# Tab", True]),
+        callable=Series([True, False, True, False, True, False]),
+    )
+
+
+# ======================================================================================
 # Sample data for comparison validators
 # ======================================================================================
 @pytest.fixture

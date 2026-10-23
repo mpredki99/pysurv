@@ -7,6 +7,7 @@ import pytest
 
 from pysurveyor.exceptions import ValidationError
 from pysurveyor.validators import IsNumeric, IsText
+from pysurveyor.validators.conversion_validators import IsBoolean
 
 
 # ======================================================================================
@@ -37,7 +38,7 @@ class TestIsNumeric:
     def test_invalid(self, numeric_data):
         is_numeric = IsNumeric()
 
-        with pytest.raises(ValidationError, match="IsNumeric"):
+        with pytest.raises(ValidationError, match="Invalid data found"):
             is_numeric(numeric_data.invalid)
 
     # ==================================================================================
@@ -158,3 +159,76 @@ class TestIsText:
 
         assert mask.all()
         assert not values.isin(["1", "2", "3"]).any()
+
+
+# ======================================================================================
+# Test validating boolean
+# ======================================================================================
+class TestIsBoolean:
+    """Tests for ``IsBoolean`` validator."""
+
+    # ==================================================================================
+    def test_empty(self, boolean_data):
+        is_boolean = IsBoolean()
+        mask, values = is_boolean(boolean_data.empty)
+
+        assert mask.empty
+        assert mask.dtype == bool
+        assert values.empty
+        assert values.dtype == "boolean"
+
+    # ==================================================================================
+    def test_valid(self, boolean_data):
+        is_boolean = IsBoolean()
+        mask, values = is_boolean(boolean_data.valid)
+
+        assert mask.all()
+        assert list(values) == list(boolean_data.valid)
+
+    # ==================================================================================
+    def test_invalid(self, boolean_data):
+        is_boolean = IsBoolean()
+
+        with pytest.raises(ValidationError, match="Invalid data found"):
+            is_boolean(boolean_data.invalid)
+
+    # ==================================================================================
+    def test_convertible(self, boolean_data):
+        is_boolean = IsBoolean()
+        mask, values = is_boolean(boolean_data.convertible)
+
+        assert mask.all()
+        assert values.dtype == "boolean"
+
+    # # ==================================================================================
+    # def test_no_ignore(self, boolean_data):
+    #     is_boolean = IsBoolean(ignore=[])
+
+    #     with pytest.raises(ValidationError):
+    #         is_boolean(boolean_data.with_empty)
+
+    # # ==================================================================================
+    # def test_ignore_literal(self, boolean_data):
+    #     is_boolean = IsBoolean(ignore=(False))
+    #     mask, values = is_boolean(boolean_data.with_empty)
+
+    #     assert mask.all()
+    #     assert not values.isin([False]).any()
+
+    # # # ==================================================================================
+    # def test_ignore_regex(self, boolean_data):
+    #     is_text = IsText()
+    #     mask, values = is_text(text_data.regex)
+
+    #     assert mask.all()
+    #     assert not values.isin(
+    #         ["# comment", "  # leading space", "\t# leading tab"]
+    #     ).any()
+
+    # # ==================================================================================
+    # def test_ignore_callable(self, boolean_data):
+    #     is_text = IsText(ignore=lambda x: str(x).isdigit())
+    #     mask, values = is_text(text_data.callable)
+
+    #     assert mask.all()
+    #     assert not values.isin(["1", "2", "3"]).any()

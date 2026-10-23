@@ -13,8 +13,11 @@ DataFrame = pd.DataFrame
 Series = pd.Series
 Index = pd.Index
 NA = pd.NA
+NAType = type(pd.NA)
 
 isna = pd.isna
+is_bool = pd.api.types.is_bool
+is_number = pd.api.types.is_number
 to_numeric = pd.to_numeric
 
 read_csv = pd.read_csv
