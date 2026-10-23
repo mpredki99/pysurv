@@ -22,3 +22,4 @@ class CSVConfig(FileConfig):
     decimal: str = "."
     skiprows: int | Callable | None = None
     nrows: int | None = None
+    comment: str | None = "#"
