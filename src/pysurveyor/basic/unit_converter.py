@@ -10,14 +10,14 @@ units using NumPy-compatible numerical operations.
 
 Supported angle units
 ---------------------
-- `rad`: radians
-- `mrad`: milliradians
+- `radian`: radians
+- `milliradian`: milliradians
 - `gon` and `grad`: gradians (400 gon per full revolution)
 - `c`: centesimal angular minutes (1/100 gon)
 - `cc`: centesimal angular seconds (1/10000 gon)
-- `degrees`: decimal degrees
-- `min`: angular minutes (1/60 degree)
-- `sec`: angular seconds (1/3600 degree)
+- `degree`: decimal degrees
+- `arcminute`: angular minutes (1/60 degree)
+- `arcsecond`: angular seconds (1/3600 degree)
 - `dms`: degrees, minutes, and seconds represented by arrays of shape
   (3,) or (N, 3) - individual value is `[degrees, minutes, seconds]`
 - ``mm_over_meter``: slope expressed as millimeters per meter
@@ -75,14 +75,14 @@ from .utils import FloatArray, as_array, normalize_numeric_type
 # Unit conversion factors
 # ======================================================================================
 ANGLE_FACTORS: dict[str, float] = {
-    "rad": 1.0,
-    "mrad": 0.001,
+    "radian": 1.0,
+    "milliradian": 0.001,
     "gon": np.pi / 200.0,
     "c": np.pi / 20000.0,
     "cc": np.pi / 2000000.0,
     "degree": np.pi / 180.0,
-    "arcmin": np.pi / 10800.0,
-    "arcsec": np.pi / 648000.0,
+    "arcminute": np.pi / 10800.0,
+    "arcsecond": np.pi / 648000.0,
 }
 
 
@@ -243,12 +243,12 @@ class _AngleTo:
     # Properties for IDE autocomplete
     # ==================================================================================
     @property
-    def rad(self) -> _Conversion:
-        return _Conversion(self._source, "rad", "angle")
+    def radian(self) -> _Conversion:
+        return _Conversion(self._source, "radian", "angle")
 
     @property
-    def mrad(self) -> _Conversion:
-        return _Conversion(self._source, "mrad", "angle")
+    def milliradian(self) -> _Conversion:
+        return _Conversion(self._source, "milliradian", "angle")
 
     @property
     def mm_over_meter(self) -> _Conversion:
@@ -278,12 +278,12 @@ class _AngleTo:
         return _Conversion(self._source, "degree", "angle")
 
     @property
-    def arcmin(self) -> _Conversion:
-        return _Conversion(self._source, "arcmin", "angle")
+    def arcminute(self) -> _Conversion:
+        return _Conversion(self._source, "arcminute", "angle")
 
     @property
-    def arcsec(self) -> _Conversion:
-        return _Conversion(self._source, "arcsec", "angle")
+    def arcsecond(self) -> _Conversion:
+        return _Conversion(self._source, "arcsecond", "angle")
 
     @property
     def dms(self) -> _Conversion:
@@ -407,12 +407,12 @@ class _From:
     # Angle sources
     # ==================================================================================
     @property
-    def rad(self) -> _AngleFrom:
-        return _AngleFrom("rad")
+    def radian(self) -> _AngleFrom:
+        return _AngleFrom("radian")
 
     @property
-    def mrad(self) -> _AngleFrom:
-        return _AngleFrom("mrad")
+    def milliradian(self) -> _AngleFrom:
+        return _AngleFrom("milliradian")
 
     @property
     def mm_over_meter(self) -> _AngleFrom:
@@ -442,12 +442,12 @@ class _From:
         return _AngleFrom("degree")
 
     @property
-    def arcmin(self) -> _AngleFrom:
-        return _AngleFrom("arcmin")
+    def arcminute(self) -> _AngleFrom:
+        return _AngleFrom("arcminute")
 
     @property
-    def arcsec(self) -> _AngleFrom:
-        return _AngleFrom("arcsec")
+    def arcsecond(self) -> _AngleFrom:
+        return _AngleFrom("arcsecond")
 
     @property
     def dms(self) -> _AngleFrom:

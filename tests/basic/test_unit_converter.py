@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from pysurveyor.basic.unit_converter import convert
+from pysurveyor.basic.units import AngleUnit, DistanceUnit
 
 
 # ======================================================================================
@@ -13,42 +14,42 @@ from pysurveyor.basic.unit_converter import convert
     ("source", "target", "value", "expected"),
     [
         # ------------------------------------------------------------------------------
-        ("rad", "rad", np.pi, np.pi),
-        ("rad", "mrad", np.pi, np.pi * 1000),
-        ("mrad", "rad", np.pi * 1000, np.pi),
-        ("rad", "gon", np.pi, 200.0),
-        ("gon", "rad", 200.0, np.pi),
-        ("rad", "grad", np.pi, 200.0),
-        ("grad", "rad", 200.0, np.pi),
-        ("rad", "c", np.pi, 20000.0),
-        ("c", "rad", 20000.0, np.pi),
-        ("rad", "cc", np.pi, 2000000.0),
-        ("cc", "rad", 2000000.0, np.pi),
-        ("rad", "degree", np.pi, 180.0),
-        ("degree", "rad", 180.0, np.pi),
-        ("rad", "arcmin", np.pi, 10800.0),
-        ("arcmin", "rad", 10800.0, np.pi),
-        ("rad", "arcsec", np.pi, 648000.0),
-        ("arcsec", "rad", 648000.0, np.pi),
+        ("radian", "radian", np.pi, np.pi),
+        ("radian", "milliradian", np.pi, np.pi * 1000),
+        ("milliradian", "radian", np.pi * 1000, np.pi),
+        ("radian", "gon", np.pi, 200.0),
+        ("gon", "radian", 200.0, np.pi),
+        ("radian", "grad", np.pi, 200.0),
+        ("grad", "radian", 200.0, np.pi),
+        ("radian", "c", np.pi, 20000.0),
+        ("c", "radian", 20000.0, np.pi),
+        ("radian", "cc", np.pi, 2000000.0),
+        ("cc", "radian", 2000000.0, np.pi),
+        ("radian", "degree", np.pi, 180.0),
+        ("degree", "radian", 180.0, np.pi),
+        ("radian", "arcminute", np.pi, 10800.0),
+        ("arcminute", "radian", 10800.0, np.pi),
+        ("radian", "arcsecond", np.pi, 648000.0),
+        ("arcsecond", "radian", 648000.0, np.pi),
         # ------------------------------------------------------------------------------
         ("degree", "mm_over_meter", 45.0, 1000.0),
         ("degree", "mm_over_meter", 1.0, 17.45506493),
         ("mm_over_meter", "gon", 1000.0, 50.0),
-        ("mrad", "mm_over_meter", 0.01, 0.01),
+        ("milliradian", "mm_over_meter", 0.01, 0.01),
         # ------------------------------------------------------------------------------
         ("degree", "gon", 180.0, 200.0),
-        ("degree", "arcmin", 1.0, 60.0),
-        ("degree", "arcsec", 1.0, 3600.0),
-        ("arcmin", "arcsec", 1.0, 60.0),
+        ("degree", "arcminute", 1.0, 60.0),
+        ("degree", "arcsecond", 1.0, 3600.0),
+        ("arcminute", "arcsecond", 1.0, 60.0),
         # ------------------------------------------------------------------------------
         ("gon", "degree", 200.0, 180.0),
         ("gon", "c", 1.0, 100.0),
         ("gon", "cc", 1.0, 10000.0),
         ("c", "cc", 1.0, 100.0),
         # ------------------------------------------------------------------------------
-        ("rad", "gon", -np.pi, -200.0),
-        ("degree", "rad", -180.0, -np.pi),
-        ("degree", "arcmin", -1.0, -60.0),
+        ("radian", "gon", -np.pi, -200.0),
+        ("degree", "radian", -180.0, -np.pi),
+        ("degree", "arcminute", -1.0, -60.0),
         ("c", "cc", -1.0, -100.0),
     ],
 )
@@ -63,10 +64,10 @@ def test_angle_scalar_conversions(source, target, value, expected):
 @pytest.mark.parametrize(
     ("source", "target", "values", "expected"),
     [
-        ("rad", "degree", [0.0, np.pi / 2, np.pi], [0.0, 90.0, 180.0]),
+        ("radian", "degree", [0.0, np.pi / 2, np.pi], [0.0, 90.0, 180.0]),
         ("gon", "degree", [0.0, 100.0, 200.0], [0.0, 90.0, 180.0]),
-        ("mrad", "rad", [100.0, 500.0, 1000.0], [0.1, 0.5, 1.0]),
-        ("degree", "arcmin", [1.0, 2.0, 3.0], [60.0, 120.0, 180.0]),
+        ("milliradian", "radian", [100.0, 500.0, 1000.0], [0.1, 0.5, 1.0]),
+        ("degree", "arcminute", [1.0, 2.0, 3.0], [60.0, 120.0, 180.0]),
     ],
 )
 def test_angle_array_conversions(source, target, values, expected):
@@ -78,7 +79,7 @@ def test_angle_array_conversions(source, target, values, expected):
 
 # ======================================================================================
 def test_angle_conversion_accepts_numpy_scalar():
-    result = convert.degree.to.rad(np.float64(180.0))
+    result = convert.degree.to.radian(np.float64(180.0))
 
     assert isinstance(result, float)
     assert result == pytest.approx(np.pi)
@@ -88,7 +89,7 @@ def test_angle_conversion_accepts_numpy_scalar():
 def test_angle_conversion_accepts_zero_dimensional_array():
     value = np.array(180.0)
 
-    result = convert.degree.to.rad(value)
+    result = convert.degree.to.radian(value)
 
     assert isinstance(result, float)
     assert result == pytest.approx(np.pi)
@@ -105,7 +106,7 @@ def test_dms_to_degrees():
 
 # ======================================================================================
 def test_dms_to_radians():
-    result = convert.dms.to.rad([180.0, 0.0, 0.0])
+    result = convert.dms.to.radian([180.0, 0.0, 0.0])
 
     assert result == pytest.approx(np.pi)
 
@@ -280,8 +281,8 @@ def test_length_conversion_accepts_zero_dimensional_array():
 @pytest.mark.parametrize(
     ("source", "target", "message"),
     [
-        ("invalid", "rad", "Invalid unit: 'invalid'"),
-        ("rad", "invalid", "Invalid angular unit: 'invalid'"),
+        ("invalid", "radian", "Invalid unit: 'invalid'"),
+        ("radian", "invalid", "Invalid angular unit: 'invalid'"),
         ("invalid", "meter", "Invalid unit: 'invalid'"),
         ("meter", "invalid", "Invalid length unit: 'invalid'"),
     ],
@@ -295,8 +296,8 @@ def test_conversion_invalid_units(source, target, message):
 @pytest.mark.parametrize(
     ("source", "target", "message"),
     [
-        ("meter", "rad", "length to angular unit: 'rad'"),
-        ("rad", "meter", "angle to length unit: 'meter'"),
+        ("meter", "radian", "length to angular unit: 'radian'"),
+        ("radian", "meter", "angle to length unit: 'meter'"),
     ],
 )
 def test_conversion_mixed_dimensions_units(source, target, message):
@@ -313,7 +314,26 @@ def test_empty_length_array():
     assert result.shape == (0,)
 
 
+# ======================================================================================
 def test_empty_angle_array():
-    result = convert.degree.to.rad(np.array([]))
+    result = convert.degree.to.radian(np.array([]))
 
     assert result.shape == (0,)
+
+
+# ======================================================================================
+# Test compatibility with PySurveyor units enumerations
+# ======================================================================================
+def test_distance_unit_compatibility():
+    for unit in DistanceUnit:
+        result = getattr(getattr(convert, unit.value).to, unit.value)([1.0, 1.0, 1.0])
+
+        assert np.allclose(result, 1.0)
+
+
+# ======================================================================================
+def test_angle_unit_compatibility():
+    for unit in AngleUnit:
+        result = getattr(getattr(convert, unit.value).to, unit.value)([1.0, 1.0, 1.0])
+
+        assert np.allclose(result, 1.0)
