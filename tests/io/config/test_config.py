@@ -21,6 +21,7 @@ def test_csv_config_kwargs() -> None:
         "decimal": ",",
         "skiprows": skiprows,
         "nrows": 10,
+        "comment": "#",
     }
 
 

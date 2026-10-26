@@ -64,57 +64,88 @@ ValueError
 
 from __future__ import annotations
 
+from numbers import Number
 from typing import overload
 
 import numpy as np
 from numpy.typing import ArrayLike
 
-from .utils import FloatArray, as_array, normalize_numeric_type
+from pysurveyor.basic.units import AngleUnit, DistanceUnit
+from pysurveyor.basic.utils import FloatArray, as_array, normalize_numeric_type
 
 # ======================================================================================
 # Unit conversion factors
 # ======================================================================================
-ANGLE_FACTORS: dict[str, float] = {
-    "radian": 1.0,
-    "milliradian": 0.001,
-    "gon": np.pi / 200.0,
-    "c": np.pi / 20000.0,
-    "cc": np.pi / 2000000.0,
-    "degree": np.pi / 180.0,
-    "arcminute": np.pi / 10800.0,
-    "arcsecond": np.pi / 648000.0,
+ANGLE_FACTORS: dict[AngleUnit, float] = {
+    AngleUnit.RADIAN: 1.0,
+    AngleUnit.MILLIRADIAN: 0.001,
+    AngleUnit.GON: np.pi / 200.0,
+    AngleUnit.C: np.pi / 20000.0,
+    AngleUnit.CC: np.pi / 2000000.0,
+    AngleUnit.DEGREE: np.pi / 180.0,
+    AngleUnit.ARCMINUTE: np.pi / 10800.0,
+    AngleUnit.ARCSECOND: np.pi / 648000.0,
+}
+
+# ======================================================================================
+DISTANCE_FACTORS: dict[DistanceUnit, float] = {
+    DistanceUnit.KILOMETER: 1000.0,
+    DistanceUnit.HECTOMETER: 100.0,
+    DistanceUnit.METER: 1.0,
+    DistanceUnit.DECIMETER: 0.1,
+    DistanceUnit.CENTIMETER: 0.01,
+    DistanceUnit.MILLIMETER: 0.001,
+    DistanceUnit.MICROMETER: 0.000001,
+    # ------------------------------
+    DistanceUnit.MILE: 1609.344,
+    DistanceUnit.YARD: 0.9144,
+    DistanceUnit.FEET: 0.3048,
+    DistanceUnit.INCH: 0.0254,
+    DistanceUnit.THOU: 0.0000254,
+}
+
+# ======================================================================================
+SPECIAL_ANGLE_UNITS = {
+    AngleUnit.DMS,
+    AngleUnit.MM_OVER_METER,
 }
 
 
 # ======================================================================================
-LENGTH_FACTORS: dict[str, float] = {
-    "kilometer": 1000.0,
-    "hectometer": 100.0,
-    "meter": 1.0,
-    "decimeter": 0.1,
-    "centimeter": 0.01,
-    "millimeter": 0.001,
-    "micrometer": 0.000001,
-    # ------------------------------
-    "mile": 1609.344,
-    "yard": 0.9144,
-    "feet": 0.3048,
-    "inch": 0.0254,
-    "thou": 0.0000254,
-}
+# Unit normalization
+# ======================================================================================
+def _resolve_unit(unit: str | AngleUnit | DistanceUnit) -> AngleUnit | DistanceUnit:
+    """Resolve a unit string or enum member to its canonical enum member."""
+    if isinstance(unit, (AngleUnit, DistanceUnit)):
+        return unit
+
+    if not isinstance(unit, str):
+        raise TypeError(
+            f"Unit must be a string or unit enum, got {type(unit).__name__}."
+        )
+
+    name = unit.lower()
+
+    for enum_type in (AngleUnit, DistanceUnit):
+        try:
+            return enum_type(name)
+        except ValueError:
+            continue
+
+    raise ValueError(f"Unknown unit: {unit!r}.")
 
 
 # ======================================================================================
 # Conversion helper functions
 # ======================================================================================
-def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
+def _angle_to_radians(value: object, unit: AngleUnit) -> float | FloatArray:
     """Convert an angle from the specified unit to radians."""
 
-    if unit == "mm_over_meter":
+    if unit is AngleUnit.MM_OVER_METER:
         return np.arctan(normalize_numeric_type(value) / 1000.0)
 
     # ----------------------------------------------------------------------------------
-    if unit == "dms":
+    if unit is AngleUnit.DMS:
         array = as_array(value)
 
         if array.ndim not in (1, 2) or array.shape[-1] != 3:
@@ -129,24 +160,22 @@ def _angle_to_radians(value: object, unit: str) -> float | FloatArray:
         sign = np.where(array[..., 0] < 0.0, -1.0, 1.0)
         degrees = np.abs(array[..., 0]) + array[..., 1] / 60.0 + array[..., 2] / 3600.0
 
-        return sign * degrees * ANGLE_FACTORS["degree"]
+        return sign * degrees * ANGLE_FACTORS[AngleUnit.DEGREE]
 
     # ----------------------------------------------------------------------------------
-    factor = ANGLE_FACTORS[unit]
-
-    return normalize_numeric_type(value) * factor
+    return normalize_numeric_type(value) * ANGLE_FACTORS[unit]
 
 
 # ======================================================================================
-def _radians_to_angle(radians: float | FloatArray, unit: str) -> float | FloatArray:
+def _radians_to_angle(radians: object, unit: AngleUnit) -> float | FloatArray:
     """Convert an angle in radians to the specified target unit."""
 
-    if unit == "mm_over_meter":
+    if unit is AngleUnit.MM_OVER_METER:
         return 1000.0 * np.tan(normalize_numeric_type(radians))
 
     # ----------------------------------------------------------------------------------
-    if unit == "dms":
-        degrees = as_array(radians) / ANGLE_FACTORS["degree"]
+    if unit is AngleUnit.DMS:
+        degrees = as_array(radians) / ANGLE_FACTORS[AngleUnit.DEGREE]
 
         sign = np.where(degrees < 0.0, -1.0, 1.0)
         absolute_degrees = np.abs(degrees)
@@ -161,22 +190,24 @@ def _radians_to_angle(radians: float | FloatArray, unit: str) -> float | FloatAr
         return np.stack([whole_degrees, whole_minutes, seconds], axis=-1)
 
     # ----------------------------------------------------------------------------------
-    factor = ANGLE_FACTORS[unit]
-
-    return normalize_numeric_type(radians) / factor
+    return normalize_numeric_type(radians) / ANGLE_FACTORS[unit]
 
 
 # ======================================================================================
-def _convert_angle(value: object, source: str, target: str) -> float | FloatArray:
+def _convert_angle(
+    value: object, source: AngleUnit, target: AngleUnit
+) -> float | FloatArray:
     """Convert an angle between supported units."""
     radians = _angle_to_radians(value, source)
     return _radians_to_angle(radians, target)
 
 
 # ======================================================================================
-def _convert_length(value: object, source: str, target: str) -> float | FloatArray:
-    """Convert a length between supported units."""
-    factor = LENGTH_FACTORS[source] / LENGTH_FACTORS[target]
+def _convert_distance(
+    value: object, source: DistanceUnit, target: DistanceUnit
+) -> float | FloatArray:
+    """Convert a distance between supported units."""
+    factor = DISTANCE_FACTORS[source] / DISTANCE_FACTORS[target]
 
     return normalize_numeric_type(value) * factor
 
@@ -187,41 +218,41 @@ def _convert_length(value: object, source: str, target: str) -> float | FloatArr
 class _Conversion:
     """Callable conversion between a source unit and a target unit."""
 
-    def __init__(self, source: str, target: str, dimension: str) -> None:
-        angle_units = set(ANGLE_FACTORS) | {"dms", "mm_over_meter"}
-        length_units = set(LENGTH_FACTORS)
+    def __init__(
+        self, source: AngleUnit | DistanceUnit, target: AngleUnit | DistanceUnit
+    ) -> None:
 
-        if dimension == "angle":
-            valid_units = angle_units
-        elif dimension == "length":
-            valid_units = length_units
-        else:
-            raise ValueError(f"Unsupported dimension: {dimension!r}")
-
-        if source not in valid_units:
-            raise ValueError(f"Source unit {source!r} is not a valid {dimension} unit.")
-
-        if target not in valid_units:
-            raise ValueError(f"Target unit {target!r} is not a valid {dimension} unit.")
+        if type(source) is not type(target):
+            raise ValueError(
+                f"Cannot convert {source!r} to {target!r}: "
+                "units belong to different dimensions."
+            )
 
         # ------------------------------------------------------------------------------
         self._source = source
         self._target = target
-        self._dimension = dimension
 
     # ==================================================================================
     @overload
-    def __call__(self, value: int | float | np.number) -> float: ...
+    def __call__(self, value: Number | np.number) -> float: ...
 
     @overload
     def __call__(self, value: ArrayLike) -> FloatArray: ...
 
     def __call__(self, value: object) -> float | FloatArray:
         """Convert value from the source unit to the target unit."""
-        if self._dimension == "angle":
+        if isinstance(self._source, AngleUnit) and isinstance(self._target, AngleUnit):
             return _convert_angle(value, self._source, self._target)
-
-        return _convert_length(value, self._source, self._target)
+        # ------------------------------------------------------------------------------
+        if isinstance(self._source, DistanceUnit) and isinstance(
+            self._target, DistanceUnit
+        ):
+            return _convert_distance(value, self._source, self._target)
+        # ------------------------------------------------------------------------------
+        raise ValueError(
+            f"Cannot convert {self._source!r} to {self._target!r}: "
+            "units belong to different dimensions."
+        )
 
 
 # ======================================================================================
@@ -230,64 +261,66 @@ class _Conversion:
 class _AngleTo:
     """Expose supported target units for angle conversions."""
 
-    def __init__(self, source: str) -> None:
+    def __init__(self, source: AngleUnit) -> None:
         self._source = source
 
     def __getattr__(self, name: str) -> _Conversion:
-        if name in LENGTH_FACTORS:
+        unit = _resolve_unit(name)
+
+        if isinstance(unit, DistanceUnit):
             raise AttributeError(f"Cannot convert angle to length unit: {name!r}.")
 
-        raise AttributeError(f"Invalid angular unit: {name!r}.")
+        raise AttributeError(f"Unknown angular unit: {name!r}.")
 
     # ==================================================================================
     # Properties for IDE autocomplete
     # ==================================================================================
     @property
     def radian(self) -> _Conversion:
-        return _Conversion(self._source, "radian", "angle")
+        return _Conversion(self._source, AngleUnit.RADIAN)
 
     @property
     def milliradian(self) -> _Conversion:
-        return _Conversion(self._source, "milliradian", "angle")
+        return _Conversion(self._source, AngleUnit.MILLIRADIAN)
 
     @property
     def mm_over_meter(self) -> _Conversion:
-        return _Conversion(self._source, "mm_over_meter", "angle")
+        return _Conversion(self._source, AngleUnit.MM_OVER_METER)
 
     # ==================================================================================
     @property
     def gon(self) -> _Conversion:
-        return _Conversion(self._source, "gon", "angle")
+        return _Conversion(self._source, AngleUnit.GON)
 
     @property
     def grad(self) -> _Conversion:
         """Alias property for gon."""
-        return _Conversion(self._source, "gon", "angle")
+        return _Conversion(self._source, AngleUnit.GON)
 
     @property
     def c(self) -> _Conversion:
-        return _Conversion(self._source, "c", "angle")
+        return _Conversion(self._source, AngleUnit.C)
 
     @property
     def cc(self) -> _Conversion:
-        return _Conversion(self._source, "cc", "angle")
+        return _Conversion(self._source, AngleUnit.CC)
 
     # ==================================================================================
     @property
     def degree(self) -> _Conversion:
-        return _Conversion(self._source, "degree", "angle")
+        return _Conversion(self._source, AngleUnit.DEGREE)
 
     @property
     def arcminute(self) -> _Conversion:
-        return _Conversion(self._source, "arcminute", "angle")
+        return _Conversion(self._source, AngleUnit.ARCMINUTE)
 
     @property
     def arcsecond(self) -> _Conversion:
-        return _Conversion(self._source, "arcsecond", "angle")
+        return _Conversion(self._source, AngleUnit.ARCSECOND)
 
     @property
     def dms(self) -> _Conversion:
-        return _Conversion(self._source, "dms", "angle")
+        return _Conversion(self._source, AngleUnit.DMS)
 
 
 # ======================================================================================
@@ -296,66 +329,68 @@ class _AngleTo:
 class _LengthTo:
     """Expose supported target units for length conversions."""
 
-    def __init__(self, source: str) -> None:
+    def __init__(self, source: DistanceUnit) -> None:
         self._source = source
 
     def __getattr__(self, name: str) -> _Conversion:
-        if name in set(ANGLE_FACTORS) | {"dms", "mm_over_meter", "grad"}:
+        unit = _resolve_unit(name)
+
+        if isinstance(unit, AngleUnit):
             raise AttributeError(f"Cannot convert length to angular unit: {name!r}.")
 
-        raise AttributeError(f"Invalid length unit: {name!r}.")
+        raise AttributeError(f"Unknown length unit: {name!r}.")
 
     # ==================================================================================
     # Properties for IDE autocomplete
     # ==================================================================================
     @property
     def kilometer(self) -> _Conversion:
-        return _Conversion(self._source, "kilometer", "length")
+        return _Conversion(self._source, DistanceUnit.KILOMETER)
 
     @property
     def hectometer(self) -> _Conversion:
-        return _Conversion(self._source, "hectometer", "length")
+        return _Conversion(self._source, DistanceUnit.HECTOMETER)
 
     @property
     def meter(self) -> _Conversion:
-        return _Conversion(self._source, "meter", "length")
+        return _Conversion(self._source, DistanceUnit.METER)
 
     @property
     def decimeter(self) -> _Conversion:
-        return _Conversion(self._source, "decimeter", "length")
+        return _Conversion(self._source, DistanceUnit.DECIMETER)
 
     @property
     def centimeter(self) -> _Conversion:
-        return _Conversion(self._source, "centimeter", "length")
+        return _Conversion(self._source, DistanceUnit.CENTIMETER)
 
     @property
     def millimeter(self) -> _Conversion:
-        return _Conversion(self._source, "millimeter", "length")
+        return _Conversion(self._source, DistanceUnit.MILLIMETER)
 
     @property
     def micrometer(self) -> _Conversion:
-        return _Conversion(self._source, "micrometer", "length")
+        return _Conversion(self._source, DistanceUnit.MICROMETER)
 
     # ==================================================================================
     @property
     def mile(self) -> _Conversion:
-        return _Conversion(self._source, "mile", "length")
+        return _Conversion(self._source, DistanceUnit.MILE)
 
     @property
     def yard(self) -> _Conversion:
-        return _Conversion(self._source, "yard", "length")
+        return _Conversion(self._source, DistanceUnit.YARD)
 
     @property
     def feet(self) -> _Conversion:
-        return _Conversion(self._source, "feet", "length")
+        return _Conversion(self._source, DistanceUnit.FEET)
 
     @property
     def inch(self) -> _Conversion:
-        return _Conversion(self._source, "inch", "length")
+        return _Conversion(self._source, DistanceUnit.INCH)
 
     @property
     def thou(self) -> _Conversion:
-        return _Conversion(self._source, "thou", "length")
+        return _Conversion(self._source, DistanceUnit.THOU)
 
 
 # ======================================================================================
@@ -364,7 +399,7 @@ class _LengthTo:
 class _AngleFrom:
     """Expose target-unit conversions for a source angle unit."""
 
-    def __init__(self, source: str) -> None:
+    def __init__(self, source: AngleUnit) -> None:
         self._source = source
 
     # ==================================================================================
@@ -379,7 +414,7 @@ class _AngleFrom:
 class _LengthFrom:
     """Expose target-unit conversions for a source length unit."""
 
-    def __init__(self, source: str) -> None:
+    def __init__(self, source: DistanceUnit) -> None:
         self._source = source
 
     # ==================================================================================
@@ -395,115 +430,117 @@ class _From:
     """Expose all supported source units for unit conversion."""
 
     def __getattr__(self, name: str) -> _AngleFrom | _LengthFrom:
-        if name in set(ANGLE_FACTORS) | {"dms", "mm_over_meter", "grad"}:
-            return _AngleFrom("gon" if name == "grad" else name)
+        unit = _resolve_unit(name)
 
-        if name in LENGTH_FACTORS:
-            return _LengthFrom(name)
+        if isinstance(unit, AngleUnit):
+            return _AngleFrom(unit)
 
-        raise AttributeError(f"Invalid unit: {name!r}.")
+        if isinstance(unit, DistanceUnit):
+            return _LengthFrom(unit)
+
+        raise AttributeError(f"Unknown unit: {name!r}.")
 
     # ==================================================================================
     # Angle sources
     # ==================================================================================
     @property
     def radian(self) -> _AngleFrom:
-        return _AngleFrom("radian")
+        return _AngleFrom(AngleUnit.RADIAN)
 
     @property
     def milliradian(self) -> _AngleFrom:
-        return _AngleFrom("milliradian")
+        return _AngleFrom(AngleUnit.MILLIRADIAN)
 
     @property
     def mm_over_meter(self) -> _AngleFrom:
-        return _AngleFrom("mm_over_meter")
+        return _AngleFrom(AngleUnit.MM_OVER_METER)
 
     # ==================================================================================
     @property
     def gon(self) -> _AngleFrom:
-        return _AngleFrom("gon")
+        return _AngleFrom(AngleUnit.GON)
 
     @property
     def grad(self) -> _AngleFrom:
         """Alias property for gon."""
-        return _AngleFrom("gon")
+        return _AngleFrom(AngleUnit.GON)
 
     @property
     def c(self) -> _AngleFrom:
-        return _AngleFrom("c")
+        return _AngleFrom(AngleUnit.C)
 
     @property
     def cc(self) -> _AngleFrom:
-        return _AngleFrom("cc")
+        return _AngleFrom(AngleUnit.CC)
 
     # ==================================================================================
     @property
     def degree(self) -> _AngleFrom:
-        return _AngleFrom("degree")
+        return _AngleFrom(AngleUnit.DEGREE)
 
     @property
     def arcminute(self) -> _AngleFrom:
-        return _AngleFrom("arcminute")
+        return _AngleFrom(AngleUnit.ARCMINUTE)
 
     @property
     def arcsecond(self) -> _AngleFrom:
-        return _AngleFrom("arcsecond")
+        return _AngleFrom(AngleUnit.ARCSECOND)
 
     @property
     def dms(self) -> _AngleFrom:
-        return _AngleFrom("dms")
+        return _AngleFrom(AngleUnit.DMS)
 
     # ==================================================================================
     # Length sources
     # ==================================================================================
     @property
     def kilometer(self) -> _LengthFrom:
-        return _LengthFrom("kilometer")
+        return _LengthFrom(DistanceUnit.KILOMETER)
 
     @property
     def hectometer(self) -> _LengthFrom:
-        return _LengthFrom("hectometer")
+        return _LengthFrom(DistanceUnit.HECTOMETER)
 
     @property
     def meter(self) -> _LengthFrom:
-        return _LengthFrom("meter")
+        return _LengthFrom(DistanceUnit.METER)
 
     @property
     def decimeter(self) -> _LengthFrom:
-        return _LengthFrom("decimeter")
+        return _LengthFrom(DistanceUnit.DECIMETER)
 
     @property
     def centimeter(self) -> _LengthFrom:
-        return _LengthFrom("centimeter")
+        return _LengthFrom(DistanceUnit.CENTIMETER)
 
     @property
     def millimeter(self) -> _LengthFrom:
-        return _LengthFrom("millimeter")
+        return _LengthFrom(DistanceUnit.MILLIMETER)
 
     @property
     def micrometer(self) -> _LengthFrom:
-        return _LengthFrom("micrometer")
+        return _LengthFrom(DistanceUnit.MICROMETER)
 
     # ==================================================================================
     @property
     def mile(self) -> _LengthFrom:
-        return _LengthFrom("mile")
+        return _LengthFrom(DistanceUnit.MILE)
 
     @property
     def yard(self) -> _LengthFrom:
-        return _LengthFrom("yard")
+        return _LengthFrom(DistanceUnit.YARD)
 
     @property
     def feet(self) -> _LengthFrom:
-        return _LengthFrom("feet")
+        return _LengthFrom(DistanceUnit.FEET)
 
     @property
     def inch(self) -> _LengthFrom:
-        return _LengthFrom("inch")
+        return _LengthFrom(DistanceUnit.INCH)
 
     @property
     def thou(self) -> _LengthFrom:
-        return _LengthFrom("thou")
+        return _LengthFrom(DistanceUnit.THOU)
 
 
 # ======================================================================================

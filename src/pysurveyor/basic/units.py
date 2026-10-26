@@ -46,7 +46,7 @@ class AngleUnit(AliasedStrEnum):
     # Angle units
     # ==================================================================================
     RADIAN = "radian", "radians", "rad", "rads"
-    MILIRADIAN = "milliradian", "milliradians", "mrad", "mrads"
+    MILLIRADIAN = "milliradian", "milliradians", "mrad", "mrads"
     GON = "gon", "gons", "grad", "grads", "g"
     C = "c"
     CC = "cc"

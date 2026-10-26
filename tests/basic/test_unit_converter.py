@@ -281,14 +281,14 @@ def test_length_conversion_accepts_zero_dimensional_array():
 @pytest.mark.parametrize(
     ("source", "target", "message"),
     [
-        ("invalid", "radian", "Invalid unit: 'invalid'"),
-        ("radian", "invalid", "Invalid angular unit: 'invalid'"),
-        ("invalid", "meter", "Invalid unit: 'invalid'"),
-        ("meter", "invalid", "Invalid length unit: 'invalid'"),
+        ("invalid", "radian", "Unknown unit: 'invalid'"),
+        ("radian", "invalid", "Unknown unit: 'invalid'"),
+        ("invalid", "meter", "Unknown unit: 'invalid'"),
+        ("meter", "invalid", "Unknown unit: 'invalid'"),
     ],
 )
 def test_conversion_invalid_units(source, target, message):
-    with pytest.raises(AttributeError, match=message):
+    with pytest.raises(ValueError, match=message):
         getattr(getattr(convert, source).to, target)(0)
 
 
