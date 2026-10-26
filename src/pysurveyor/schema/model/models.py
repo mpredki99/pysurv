@@ -22,37 +22,37 @@ class Models:
     # Properties for lazy loading of models
     # ==================================================================================
     @property
-    def points(self):
+    def points(self) -> DataFrame:
         data = get_points_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def controls(self):
+    def controls(self) -> DataFrame:
         data = get_controls_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def stations(self):
+    def stations(self) -> DataFrame:
         data = get_stations_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def instruments(self):
+    def instruments(self) -> DataFrame:
         data = get_instruments_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def targets(self):
+    def targets(self) -> DataFrame:
         data = get_targets_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def measurements(self):
+    def measurements(self) -> DataFrame:
         data = get_measurements_model_data()
         return self._build_model(data)
 
