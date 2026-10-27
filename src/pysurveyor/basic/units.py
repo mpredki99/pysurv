@@ -7,12 +7,19 @@ from pysurveyor.utils.aliased_str_enum import AliasedStrEnum
 
 
 # ======================================================================================
-# Distance units enumeration
+# Base class for ``PySurveyor`` units enumeration
 # ======================================================================================
-class DistanceUnit(AliasedStrEnum):
-    """ "PySurveyor distance units enumeration class."""
+class Unit(AliasedStrEnum):
+    """Base class for ``PySurveyor`` units enumeration classes."""
 
     __to_lower__ = True
+
+
+# ======================================================================================
+# Distance units enumeration
+# ======================================================================================
+class DistanceUnit(Unit):
+    """``PySurveyor`` distance units enumeration class."""
 
     # ==================================================================================
     # Metric distance units
@@ -37,10 +44,8 @@ class DistanceUnit(AliasedStrEnum):
 # ======================================================================================
 # Angle units enumeration
 # ======================================================================================
-class AngleUnit(AliasedStrEnum):
-    """ "PySurveyor angle units enumeration class."""
-
-    __to_lower__ = True
+class AngleUnit(Unit):
+    """``PySurveyor`` angle units enumeration class."""
 
     # ==================================================================================
     # Angle units

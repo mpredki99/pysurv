@@ -70,7 +70,7 @@ from typing import overload
 import numpy as np
 from numpy.typing import ArrayLike
 
-from pysurveyor.basic.units import AngleUnit, DistanceUnit
+from pysurveyor.basic.units import AngleUnit, DistanceUnit, Unit
 from pysurveyor.basic.utils import FloatArray, as_array, normalize_numeric_type
 
 # ======================================================================================
@@ -114,9 +114,9 @@ SPECIAL_ANGLE_UNITS = {
 # ======================================================================================
 # Unit normalization
 # ======================================================================================
-def _resolve_unit(unit: str | AngleUnit | DistanceUnit) -> AngleUnit | DistanceUnit:
+def _resolve_unit(unit: str | Unit) -> Unit:
     """Resolve a unit string or enum member to its canonical enum member."""
-    if isinstance(unit, (AngleUnit, DistanceUnit)):
+    if isinstance(unit, Unit):
         return unit
 
     if not isinstance(unit, str):
@@ -218,9 +218,7 @@ def _convert_distance(
 class _Conversion:
     """Callable conversion between a source unit and a target unit."""
 
-    def __init__(
-        self, source: AngleUnit | DistanceUnit, target: AngleUnit | DistanceUnit
-    ) -> None:
+    def __init__(self, source: Unit, target: Unit) -> None:
 
         if type(source) is not type(target):
             raise ValueError(
