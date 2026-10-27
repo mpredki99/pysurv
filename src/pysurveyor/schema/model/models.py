@@ -4,7 +4,7 @@
 # Full text of the license can be found in the LICENSE and COPYING files.
 
 from pysurveyor.backend.backend import DataFrame
-from pysurveyor.schema.model.controls_model import get_controls_model_data
+from pysurveyor.schema.model.control_points_model import get_control_points_model_data
 from pysurveyor.schema.model.instruments_model import get_instruments_model_data
 from pysurveyor.schema.model.measurements_model import get_measurements_model_data
 from pysurveyor.schema.model.points_model import get_points_model_data
@@ -28,8 +28,8 @@ class Models:
 
     # ==================================================================================
     @property
-    def controls(self) -> DataFrame:
-        data = get_controls_model_data()
+    def control_points(self) -> DataFrame:
+        data = get_control_points_model_data()
         return self._build_model(data)
 
     # ==================================================================================
