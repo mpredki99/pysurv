@@ -76,6 +76,8 @@ class Table(PySurveyorIO[LoaderType]):
         return self._data.columns
 
     # ==================================================================================
+    # Indexers
+    # ==================================================================================
     @property
     def loc(self):
         """Provide label-based indexing for rows and columns."""
