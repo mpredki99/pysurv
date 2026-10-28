@@ -5,9 +5,7 @@
 
 from __future__ import annotations
 
-from ast import pattern
 from collections.abc import Iterable, Iterator
-from email.mime import text
 from os import PathLike
 from pathlib import Path
 import re
