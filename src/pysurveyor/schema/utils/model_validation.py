@@ -1,7 +1,11 @@
-from collections import Counter
+# Coding: UTF-8
+
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files.
+
 from collections.abc import Set
 
-from pysurveyor.backend.backend import DataFrame, Index, isna
+from pysurveyor.backend.backend import DataFrame, Index, RangeIndex, isna
 
 
 # ======================================================================================
@@ -13,18 +17,34 @@ def validate_model(
     expected_index: Index,
     schema_name: str,
 ) -> DataFrame:
-    """Validate a model's index, columns, and non-null column values."""
+    """Standardize and validate a model's index, columns, and non-null column values."""
 
     expected_index_name = expected_index.name
     # ----------------------------------------------------------------------------------
     if expected_index_name in model.columns:
+        if not isinstance(model.index, RangeIndex):
+            raise ValueError(
+                f"Cannot set index for {schema_name}: column {expected_index_name!r} "
+                f"exists, but the model already has an index {model.index.name!r}."
+            )
         model = model.set_index(expected_index_name)
 
     # ----------------------------------------------------------------------------------
-    assert_valid_index(model.index, expected_index, schema_name)
-    assert_valid_columns(model, expected_columns, schema_name)
+    assert_valid_model(model, expected_columns, expected_index, schema_name)
     # ----------------------------------------------------------------------------------
     return model
+
+
+# ======================================================================================
+def assert_valid_model(
+    model: DataFrame,
+    expected_columns: dict[str, type],
+    expected_index: Index,
+    schema_name: str,
+) -> None:
+    """Validate a model's index, columns, and non-null column values."""
+    assert_valid_index(model.index, expected_index, schema_name)
+    assert_valid_columns(model, expected_columns, schema_name)
 
 
 # ======================================================================================
@@ -57,7 +77,7 @@ def assert_valid_columns(
     # ----------------------------------------------------------------------------------
     assert_valid_columns_existence(model.columns, expected_columns.keys(), schema_name)
     # ----------------------------------------------------------------------------------
-    assert_valid_columns_dtype(model, expected_columns, schema_name)
+    assert_valid_columns_values(model, expected_columns, schema_name)
 
 
 # ======================================================================================
@@ -85,7 +105,7 @@ def assert_valid_columns_existence(
 
 
 # ======================================================================================
-def assert_valid_columns_dtype(
+def assert_valid_columns_values(
     model: DataFrame, expected_columns: dict[str, type], schema_name: str
 ) -> None:
     """Validate column names and non-null values against expected types."""

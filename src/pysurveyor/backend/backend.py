@@ -10,6 +10,7 @@ from __future__ import annotations
 import pandas as pd
 
 DataFrame = pd.DataFrame
+RangeIndex = pd.RangeIndex
 Series = pd.Series
 Index = pd.Index
 NA = pd.NA
