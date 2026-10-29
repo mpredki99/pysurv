@@ -15,6 +15,9 @@ from pysurveyor.schema.model.models import models
 from pysurveyor.schema.utils.validation_mode import ValidationMode
 
 
+# ======================================================================================
+# Stations schema class
+# ======================================================================================
 class StationsSchema(StrictSchema[SchemaLoader]):
     """
     Base class for stations schema in the PySurveyor framework, providing

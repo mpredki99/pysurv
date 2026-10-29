@@ -15,6 +15,9 @@ from pysurveyor.schema.model.models import models
 from pysurveyor.schema.utils.validation_mode import ValidationMode
 
 
+# ======================================================================================
+# Measurements schema class
+# ======================================================================================
 class MeasurementsSchema(StrictSchema[SchemaLoader]):
     """
     Base class for measurements schema in the PySurveyor framework, providing

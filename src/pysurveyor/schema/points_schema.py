@@ -15,6 +15,9 @@ from pysurveyor.schema.model.models import models
 from pysurveyor.schema.utils.validation_mode import ValidationMode
 
 
+# ======================================================================================
+# Points schema class
+# ======================================================================================
 class PointsSchema(StrictSchema[SchemaLoader]):
     """
     Base class for points schema in the PySurveyor framework, providing

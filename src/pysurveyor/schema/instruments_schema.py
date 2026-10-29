@@ -15,6 +15,9 @@ from pysurveyor.schema.model.models import models
 from pysurveyor.schema.utils.validation_mode import ValidationMode
 
 
+# ======================================================================================
+# Instruments schema class
+# ======================================================================================
 class InstrumentsSchema(StrictSchema[SchemaLoader]):
     """
     Base class for instruments schema in the PySurveyor framework, providing
