@@ -79,7 +79,15 @@ class Validator(PySurveyorABC):
     def __repr__(self) -> str:
         """Return a constructor-like representation of the validator's attributes."""
         attrs = ", ".join(
-            f"{key.lstrip('_')}={value!r}" for key, value in self.__dict__.items()
+            f"{key.lstrip('_')}={value!r}"
+            for key, value in self.__dict__.items()
+            if key
+            not in (
+                "_ignore_na",
+                "_ignore_literals",
+                "_ignore_regexes",
+                "_ignore_callables",
+            )
         )
         return f"{self.__class__.__name__}({attrs})"
 

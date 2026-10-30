@@ -25,8 +25,6 @@ class ControlPointsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["ControlPointsSchema"])
     parse = ParserAccessor(SchemaParser["ControlPointsSchema"])
 

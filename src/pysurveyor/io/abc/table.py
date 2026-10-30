@@ -5,9 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
 
-from pysurveyor.backend.backend import DataFrame, Index
+from pysurveyor.backend.backend import DataFrame, Index, Series
 from pysurveyor.io.abc.pysurveyor_io import PySurveyorIO
 from pysurveyor.typing.vars import LoaderType
 
@@ -76,6 +76,12 @@ class Table(PySurveyorIO[LoaderType]):
         return self._data.columns
 
     # ==================================================================================
+    @property
+    def dtypes(self) -> Series[Any]:
+        """Return the data types of the underlying data."""
+        return self._data.dtypes
+
+    # ==================================================================================
     # Indexers
     # ==================================================================================
     @property
@@ -100,3 +106,26 @@ class Table(PySurveyorIO[LoaderType]):
     def iat(self):
         """Provide integer-based scalar access for rows and columns."""
         return self._data.iat
+
+    # ==================================================================================
+    # Backend methods
+    # ==================================================================================
+    @overload
+    def equals(self, other: DataFrame) -> bool:
+        """Check if the underlying data is equal to another table's data."""
+        ...
+
+    @overload
+    def equals(self, other: Table) -> bool:
+        """Check if the underlying data is equal to another table's data."""
+        ...
+
+    def equals(self, other: Table | DataFrame) -> bool:
+        """Check if the underlying data is equal to another table's data."""
+        if isinstance(other, DataFrame):
+            return self._data.equals(other)
+
+        if isinstance(other, Table):
+            return self._data.equals(other._data)
+
+        raise TypeError(f"Unsupported type for comparison: {type(other)}")
