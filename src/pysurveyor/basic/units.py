@@ -72,3 +72,32 @@ class AngleUnit(Unit):
         "deg arcmin arcsec",
         "deg min sec",
     )
+
+
+# ======================================================================================
+# Parse unit
+# ======================================================================================
+def parse_unit(unit: str) -> Unit:
+    """Parse a unit string and return the corresponding ``Unit`` enumeration member.
+
+    Parameters
+    ----------
+    unit : str
+        The unit string to parse.
+
+    Returns
+    -------
+    Unit
+        The corresponding ``Unit`` enumeration member.
+    """
+    try:
+        return DistanceUnit(unit)
+    except ValueError:
+        pass
+
+    try:
+        return AngleUnit(unit)
+    except ValueError:
+        pass
+
+    raise ValueError(f"Unknown unit: {unit!r}")

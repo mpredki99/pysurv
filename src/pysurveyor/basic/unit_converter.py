@@ -70,7 +70,7 @@ from typing import overload
 import numpy as np
 from numpy.typing import ArrayLike
 
-from pysurveyor.basic.units import AngleUnit, DistanceUnit, Unit
+from pysurveyor.basic.units import AngleUnit, DistanceUnit, Unit, parse_unit
 from pysurveyor.basic.utils import FloatArray, as_array, normalize_numeric_type
 
 # ======================================================================================
@@ -124,15 +124,7 @@ def _resolve_unit(unit: str | Unit) -> Unit:
             f"Unit must be a string or unit enum, got {type(unit).__name__}."
         )
 
-    name = unit.lower()
-
-    for enum_type in (AngleUnit, DistanceUnit):
-        try:
-            return enum_type(name)
-        except ValueError:
-            continue
-
-    raise ValueError(f"Unknown unit: {unit!r}.")
+    return parse_unit(unit)
 
 
 # ======================================================================================
