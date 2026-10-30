@@ -8,13 +8,15 @@ from __future__ import annotations
 from os import PathLike
 from pathlib import Path
 
-from pysurveyor.backend.backend import read_csv
+from pysurveyor.backend.backend import NA, read_csv
+from pysurveyor.basic.units import parse_unit
 from pysurveyor.io.cache.cache_keys import create_file_cache_key
 from pysurveyor.io.cache.loader_cache import LoaderCache
 from pysurveyor.io.config.file_configs import CSVConfig
 from pysurveyor.io.loader.abc.table_loader import TableLoader
 from pysurveyor.schema.utils.validation_mode import ValidationMode
 from pysurveyor.typing.vars import SchemaType
+from pysurveyor.validators.utils.parser import parse_validator
 
 
 # ======================================================================================
@@ -72,6 +74,17 @@ class SchemaLoader(TableLoader[SchemaType]):
         model = LoaderCache.current().get_data(
             key, lambda: read_csv(path, **config.kwargs)
         )
+
+        # ------------------------------------------------------------------------------
+        # Parse units and validators in the schema model
+        # ------------------------------------------------------------------------------
+        model.loc[:, "unit"] = [
+            parse_unit(u.strip()) if u.strip() else NA for u in model["unit"]
+        ]
+
+        model.loc[:, "validator"] = [
+            parse_validator(v.strip()) if v.strip() else NA for v in model["validator"]
+        ]
 
         # ------------------------------------------------------------------------------
         if validation_mode is None:
