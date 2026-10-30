@@ -5,6 +5,6 @@
 
 """PySurveyor exceptions."""
 
-from .exceptions import PySurveyorError, ValidationError
+from .exceptions import ParseError, PySurveyorError, ValidationError
 
-__all__ = ["PySurveyorError", "ValidationError"]
+__all__ = ["PySurveyorError", "ValidationError", "ParseError"]

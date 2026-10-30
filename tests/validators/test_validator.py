@@ -50,7 +50,7 @@ def test_ignore_dict_groups_rule_types():
     validator = IsNumeric(ignore=(1, COMMENT, lambda x: True))
     ignored = validator.ignore_dict
 
-    assert ignored["na"] is False
+    assert ignored["empty"] is False
     assert ignored["literals"] == {1}
     assert ignored["regexes"] == [COMMENT]
     assert len(ignored["callables"]) == 1
@@ -59,7 +59,7 @@ def test_ignore_dict_groups_rule_types():
     validator.ignore = None
     ignored = validator.ignore_dict
 
-    assert ignored["na"] is True
+    assert ignored["empty"] is True
     assert "literals" not in ignored
     assert "regexes" not in ignored
     assert "callables" not in ignored

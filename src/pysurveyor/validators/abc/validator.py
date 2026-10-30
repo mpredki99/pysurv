@@ -107,7 +107,7 @@ class Validator(PySurveyorABC):
         ignored = {}
 
         # ------------------------------------------------------------------------------
-        ignored["na"] = self._ignore_na
+        ignored["empty"] = self._ignore_na
 
         # ------------------------------------------------------------------------------
         if self._ignore_literals:

@@ -16,3 +16,10 @@ class ValidationError(PySurveyorError):
     """Raised by a PySurveyor validator when validation fails."""
 
     pass
+
+
+# ======================================================================================
+class ParseError(PySurveyorError):
+    """Raised when a parsing error occurs."""
+
+    pass
