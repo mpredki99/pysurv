@@ -7,7 +7,10 @@ from copy import deepcopy
 import pandas as pd
 import pytest
 
+from pysurveyor.basic.units import DistanceUnit
 from pysurveyor.io.loader.schema_parser import SchemaParser
+from pysurveyor.validators.comparison_validators import GreaterOrEqual
+from pysurveyor.validators.conversion_validators import IsNumeric
 
 
 # ======================================================================================
@@ -67,7 +70,7 @@ class TestParseHeader:
     def test_unit(self, parser: SchemaParser) -> None:
         schema = parser.parse_header(["d [cm]"])
 
-        assert schema._model.at["d", "unit"] == "cm"
+        assert schema._model.at["d", "unit"] is DistanceUnit.CENTIMETER
 
     # ==================================================================================
     def test_unmarked_unit(self, parser: SchemaParser) -> None:
@@ -79,7 +82,7 @@ class TestParseHeader:
     def test_validator(self, parser: SchemaParser) -> None:
         schema = parser.parse_header(["a `IsNumeric()`"])
 
-        assert schema._model.at["a", "validator"] == "IsNumeric()"
+        assert isinstance(schema._model.at["a", "validator"], IsNumeric)
 
     # ==================================================================================
     def test_unmarked_validator(self, parser: SchemaParser) -> None:
@@ -108,8 +111,9 @@ class TestParseHeader:
         row = schema._model.loc["a"]
 
         assert row["required"] is True
-        assert row["unit"] == "m"
-        assert row["validator"] == "IsNumeric() & GreaterOrEqual(0)"
+        assert row["unit"] is DistanceUnit.METER
+        assert isinstance(row["validator"][0], IsNumeric)
+        assert isinstance(row["validator"][1], GreaterOrEqual)
         assert row["description"] == "Test description"
 
     # ==================================================================================
@@ -121,8 +125,9 @@ class TestParseHeader:
         row = schema._model.loc["a"]
 
         assert row["required"] is True
-        assert row["unit"] == "m"
-        assert row["validator"] == "IsNumeric() & GreaterOrEqual(0)"
+        assert row["unit"] is DistanceUnit.METER
+        assert isinstance(row["validator"][0], IsNumeric)
+        assert isinstance(row["validator"][1], GreaterOrEqual)
         assert row["description"] == "Test description"
 
     # ==================================================================================
@@ -133,8 +138,8 @@ class TestParseHeader:
 
         assert schema._model.at["a", "required"] is True
         assert schema._model.at["b", "required"] is False
-        assert schema._model.at["c", "unit"] == "cm"
-        assert schema._model.at["d", "validator"] == "GreaterOrEqual(0)"
+        assert schema._model.at["c", "unit"] == DistanceUnit.CENTIMETER
+        assert isinstance(schema._model.at["d", "validator"], GreaterOrEqual)
         assert schema._model.at["e", "description"] == "Test description"
 
     # ==================================================================================

@@ -12,6 +12,7 @@ import re
 from typing import Any
 
 from pysurveyor.backend.backend import read_csv
+from pysurveyor.basic.units import Unit, parse_unit
 from pysurveyor.io.config.abc.config import IOConfig
 from pysurveyor.io.config.file_configs import CSVConfig
 from pysurveyor.io.loader.abc.object_bound_loader import ObjectBoundLoader
@@ -19,6 +20,8 @@ from pysurveyor.io.source.abc.source import Source
 from pysurveyor.io.source.file_sources import CSVSource
 from pysurveyor.io.source.resolver import resolve_source
 from pysurveyor.typing.vars import SchemaType
+from pysurveyor.validators.abc.validator import Validator
+from pysurveyor.validators.utils.parser import parse_validator
 
 # ======================================================================================
 # Header patterns compiled once
@@ -136,7 +139,7 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
     # ==================================================================================
     def _parse_header_fields(
         self, header: Iterable[str]
-    ) -> Iterator[tuple[str, bool | None, str | None, str | None, str | None]]:
+    ) -> Iterator[tuple[str, bool | None, Unit | None, Validator | None, str | None]]:
         """Parse header fields.
 
         Supported annotations
@@ -186,12 +189,16 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
             remaining, unit = self._extract_header_component(
                 remaining, _HEADER_PATTERNS["unit"], "unit"
             )
+            unit = parse_unit(unit.strip()) if unit is not None else None
 
             # --------------------------------------------------------------------------
             # Extract the validator
             # --------------------------------------------------------------------------
             remaining, validator = self._extract_header_component(
                 remaining, _HEADER_PATTERNS["validator"], "validator"
+            )
+            validator = (
+                parse_validator(validator.strip()) if validator is not None else None
             )
 
             # --------------------------------------------------------------------------
