@@ -192,7 +192,7 @@ class _Evaluator:
         # ------------------------------------------------------------------------------
         if isinstance(node, ast.Dict):
             return {
-                self.evaluate(key, scope): self.evaluate(value, scope)
+                self.evaluate(key, scope): self.evaluate(value, scope)  # type: ignore
                 for key, value in zip(node.keys, node.values)
             }
 
@@ -367,7 +367,7 @@ class _Evaluator:
 
         # ------------------------------------------------------------------------------
         try:
-            result = function(*args, **kwargs)
+            result = function(*args, **kwargs)  # type: ignore
         except Exception as exc:
             raise ParseError(
                 f"Could not construct {getattr(function, '__name__', function)!s}: "
@@ -384,11 +384,12 @@ class _Evaluator:
 def parse_validator(expression: str) -> Validator:
     """Parse a string and return the corresponding Validator object."""
 
-    expression = expression.strip()
-
     # ----------------------------------------------------------------------------------
     if not isinstance(expression, str):
         raise TypeError("expression must be a string")
+
+    expression = expression.strip()
+
     if not expression:
         raise ParseError("Expression cannot be empty")
 
