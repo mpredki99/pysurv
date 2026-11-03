@@ -19,7 +19,7 @@ class ValidationError(PySurveyorError):
 
 
 # ======================================================================================
-class ParseError(PySurveyorError):
+class ParseError(PySurveyorError, ValueError):
     """Raised when a parsing error occurs."""
 
     pass
