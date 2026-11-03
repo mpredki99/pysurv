@@ -203,7 +203,7 @@ def test_degrees_to_dms_array():
     ],
 )
 def test_dms_invalid_shapes(values):
-    with pytest.raises(ValueError, match="shape \(3,\) or \(N, 3\)"):
+    with pytest.raises(ValueError, match="shape \(3,\) or \(N, 3\)"):  # type: ignore
         convert.dms.to.degree(values)
 
 
