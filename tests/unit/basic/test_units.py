@@ -1,12 +1,10 @@
-"""Tests for the pysurveyo units."""
+"""Unit tests for surveying unit enumerations."""
 
 import pytest
 
 from pysurveyor.basic import AngleUnit, DistanceUnit
 
 
-# ======================================================================================
-# Tests for AngleUnit and DistanceUnit
 # ======================================================================================
 @pytest.mark.parametrize(
     ("enum_class", "canonical", "aliases"),
@@ -58,7 +56,10 @@ from pysurveyor.basic import AngleUnit, DistanceUnit
     ],
 )
 def test_canonical_values_and_aliases(enum_class, canonical, aliases):
+    """Resolve canonical names and aliases to the same enum member."""
     member = enum_class(canonical)
+
+    # ----------------------------------------------------------------------------------
 
     assert member.value == canonical
     assert str(member) == canonical
@@ -118,7 +119,10 @@ def test_canonical_values_and_aliases(enum_class, canonical, aliases):
     ],
 )
 def test_case_insensitive_lookup(enum_class, canonical, aliases):
+    """Resolve unit names independently of letter case."""
     member = enum_class(canonical)
+
+    # ----------------------------------------------------------------------------------
 
     for value in (canonical, *aliases):
         assert enum_class(value.upper()) is member
@@ -142,5 +146,6 @@ def test_case_insensitive_lookup(enum_class, canonical, aliases):
     ],
 )
 def test_invalid_values(enum_class, invalid_value):
+    """Reject values that are not valid unit names."""
     with pytest.raises(ValueError):
         enum_class(invalid_value)

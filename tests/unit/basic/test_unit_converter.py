@@ -1,4 +1,4 @@
-"""Tests for the unit_conversion module."""
+"""Unit tests for surveying unit conversions."""
 
 import numpy as np
 import pytest
@@ -7,8 +7,6 @@ from pysurveyor.basic.unit_converter import convert
 from pysurveyor.basic.units import AngleUnit, DistanceUnit
 
 
-# ======================================================================================
-# Test angle conversions
 # ======================================================================================
 @pytest.mark.parametrize(
     ("source", "target", "value", "expected"),
@@ -54,7 +52,10 @@ from pysurveyor.basic.units import AngleUnit, DistanceUnit
     ],
 )
 def test_angle_scalar_conversions(source, target, value, expected):
+    """Convert scalar angle values between supported units."""
     result = getattr(getattr(convert, source).to, target)(value)
+
+    # ----------------------------------------------------------------------------------
 
     assert isinstance(result, float)
     assert result == pytest.approx(expected)
@@ -71,7 +72,10 @@ def test_angle_scalar_conversions(source, target, value, expected):
     ],
 )
 def test_angle_array_conversions(source, target, values, expected):
+    """Convert array-like angle values between supported units."""
     result = getattr(getattr(convert, source).to, target)(values)
+
+    # ----------------------------------------------------------------------------------
 
     assert isinstance(result, np.ndarray)
     np.testing.assert_allclose(result, expected)
@@ -81,6 +85,8 @@ def test_angle_array_conversions(source, target, values, expected):
 def test_angle_conversion_accepts_numpy_scalar():
     result = convert.degree.to.radian(np.float64(180.0))
 
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, float)
     assert result == pytest.approx(np.pi)
 
@@ -88,25 +94,30 @@ def test_angle_conversion_accepts_numpy_scalar():
 # ======================================================================================
 def test_angle_conversion_accepts_zero_dimensional_array():
     value = np.array(180.0)
-
     result = convert.degree.to.radian(value)
+
+    # ----------------------------------------------------------------------------------
 
     assert isinstance(result, float)
     assert result == pytest.approx(np.pi)
 
 
 # ======================================================================================
-# Degrees, minutes, seconds (DMS)
-# ======================================================================================
 def test_dms_to_degrees():
+    """Convert degrees-minutes-seconds values to decimal degrees."""
     result = convert.dms.to.degree([12.0, 30.0, 0.0])
+
+    # ----------------------------------------------------------------------------------
 
     assert result == pytest.approx(12.5)
 
 
 # ======================================================================================
 def test_dms_to_radians():
+    """Convert degrees-minutes-seconds values to radians."""
     result = convert.dms.to.radian([180.0, 0.0, 0.0])
+
+    # ----------------------------------------------------------------------------------
 
     assert result == pytest.approx(np.pi)
 
@@ -114,6 +125,8 @@ def test_dms_to_radians():
 # ======================================================================================
 def test_dms_to_degrees_with_negative_angle():
     result = convert.dms.to.degree([-12.0, 30.0, 0.0])
+
+    # ----------------------------------------------------------------------------------
 
     assert result == pytest.approx(-12.5)
 
@@ -129,28 +142,37 @@ def test_dms_to_degrees_array():
         ]
     )
     expected = np.array([0.0, 12.5, 45.25, -10.5])
-
+    # ----------------------------------------------------------------------------------
     result = convert.dms.to.degree(values)
+
+    # ----------------------------------------------------------------------------------
 
     np.testing.assert_allclose(result, expected)
 
 
 # ======================================================================================
 def test_degrees_to_dms():
+    """Convert decimal degrees to degrees-minutes-seconds values."""
     result = convert.degree.to.dms(12.5)
+
+    # ----------------------------------------------------------------------------------
 
     np.testing.assert_allclose(result, [12.0, 30.0, 0.0], atol=1e-10)
 
 
 # ======================================================================================
 def test_degrees_to_dms_negative_angle():
+    """Preserve the sign when converting negative decimal degrees."""
     result = convert.degree.to.dms(-12.5)
+
+    # ----------------------------------------------------------------------------------
 
     np.testing.assert_allclose(result, [-12.0, 30.0, 0.0], atol=1e-10)
 
 
 # ======================================================================================
 def test_degrees_to_dms_array():
+    """Convert an array of decimal degrees to DMS components."""
     values = np.array([0.0, 12.5, 45.25, -90.5])
     expected = np.array(
         [
@@ -160,8 +182,10 @@ def test_degrees_to_dms_array():
             [-90.0, 30.0, 0.0],
         ]
     )
-
+    # ----------------------------------------------------------------------------------
     result = convert.degree.to.dms(values)
+
+    # ----------------------------------------------------------------------------------
 
     assert result.shape == (4, 3)
     np.testing.assert_allclose(result, expected, atol=1e-9)
@@ -197,8 +221,6 @@ def test_dms_negative_minutes_or_seconds(values):
         convert.dms.to.degree(values)
 
 
-# ======================================================================================
-# Length conversions
 # ======================================================================================
 @pytest.mark.parametrize(
     ("source", "target", "value", "expected"),
@@ -237,6 +259,8 @@ def test_dms_negative_minutes_or_seconds(values):
 def test_length_scalar_conversions(source, target, value, expected):
     result = getattr(getattr(convert, source).to, target)(value)
 
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, float)
     assert result == pytest.approx(expected)
 
@@ -254,6 +278,8 @@ def test_length_scalar_conversions(source, target, value, expected):
 def test_length_array_conversions(source, target, values, expected):
     result = getattr(getattr(convert, source).to, target)(values)
 
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, np.ndarray)
     assert result.dtype == np.float64
     np.testing.assert_allclose(result, expected)
@@ -263,6 +289,8 @@ def test_length_array_conversions(source, target, values, expected):
 def test_length_conversion_accepts_numpy_scalar():
     result = convert.kilometer.to.meter(np.float64(2.0))
 
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, float)
     assert result == pytest.approx(2000.0)
 
@@ -271,12 +299,12 @@ def test_length_conversion_accepts_numpy_scalar():
 def test_length_conversion_accepts_zero_dimensional_array():
     result = convert.meter.to.centimeter(np.array(2.5))
 
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, float)
     assert result == pytest.approx(250.0)
 
 
-# ======================================================================================
-# Invalid units
 # ======================================================================================
 @pytest.mark.parametrize(
     ("source", "target", "message"),
@@ -305,11 +333,11 @@ def test_conversion_mixed_dimensions_units(source, target, message):
         getattr(getattr(convert, source).to, target)(0)
 
 
-# =============================================================================
-# Additional numerical edge cases
-# =============================================================================
+# ======================================================================================
 def test_empty_length_array():
     result = convert.meter.to.centimeter(np.array([]))
+
+    # ----------------------------------------------------------------------------------
 
     assert result.shape == (0,)
 
@@ -318,15 +346,17 @@ def test_empty_length_array():
 def test_empty_angle_array():
     result = convert.degree.to.radian(np.array([]))
 
+    # ----------------------------------------------------------------------------------
+
     assert result.shape == (0,)
 
 
 # ======================================================================================
-# Test compatibility with PySurveyor units enumerations
-# ======================================================================================
 def test_distance_unit_compatibility():
     for unit in DistanceUnit:
         result = getattr(getattr(convert, unit.value).to, unit.value)([1.0, 1.0, 1.0])
+
+        # ------------------------------------------------------------------------------
 
         assert np.allclose(result, 1.0)
 
@@ -335,5 +365,7 @@ def test_distance_unit_compatibility():
 def test_angle_unit_compatibility():
     for unit in AngleUnit:
         result = getattr(getattr(convert, unit.value).to, unit.value)([1.0, 1.0, 1.0])
+
+        # ------------------------------------------------------------------------------
 
         assert np.allclose(result, 1.0)

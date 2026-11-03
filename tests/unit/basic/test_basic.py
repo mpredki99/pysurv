@@ -1,4 +1,4 @@
-"""Tests for basic surveying calculations."""
+"""Unit tests for basic surveying calculations."""
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -12,15 +12,14 @@ from pysurveyor.basic.basic import (
     wrap_pi,
 )
 
-# ======================================================================================
 PI = np.pi
 
 
 # ======================================================================================
-# Test wrap_pi
+# Unit tests for wrap_pi function
 # ======================================================================================
 class TestWrapPi:
-    """Tests for wrap_pi."""
+    """Test wrapping angles to the ``[-pi, pi]`` interval."""
 
     # ==================================================================================
     @pytest.mark.parametrize(
@@ -46,16 +45,21 @@ class TestWrapPi:
         ],
     )
     def test_scalar(self, angle, expected):
+        """Test wrap_pi with scalar inputs."""
         result = wrap_pi(angle)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(expected)
 
     # ==================================================================================
     def test_array(self):
+        """Test wrap_pi with array input."""
         angles = np.array([0, PI / 2, PI, 3 * PI / 2, 2 * PI])
-
         result = wrap_pi(angles)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert result.dtype == np.float64
@@ -63,14 +67,20 @@ class TestWrapPi:
 
     # ==================================================================================
     def test_list_input(self):
+        """Test wrap_pi with list input."""
         result = wrap_pi([0, PI, 2 * PI])
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [0.0, PI, 0.0])
 
     # ==================================================================================
     def test_zero_dimensional_array(self):
+        """Test wrap_pi with zero-dimensional array input."""
         result = wrap_pi(np.array(PI))
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(PI)
@@ -78,18 +88,20 @@ class TestWrapPi:
     # ==================================================================================
     @pytest.mark.parametrize("periods", [1, 2, -1, -2])
     def test_periodicity(self, periods):
+        """Test that wrap_pi is periodic with respect to multiples of 2 pi."""
         angles = np.arange(-3 * PI / 4, PI, PI / 4)
-
         result = wrap_pi(angles + periods * 2 * PI)
+
+        # ------------------------------------------------------------------------------
 
         assert_allclose(result, angles)
 
 
 # ======================================================================================
-# Test wrap_2pi
+# Unit tests for wrap_2pi function
 # ======================================================================================
 class TestWrap2Pi:
-    """Tests for wrap_2pi."""
+    """Test wrapping angles to the ``[0, 2*pi)`` interval."""
 
     # ==================================================================================
     @pytest.mark.parametrize(
@@ -123,8 +135,9 @@ class TestWrap2Pi:
     # ==================================================================================
     def test_array(self):
         angles = np.array([0, -PI / 2, -PI, -3 * PI / 2, -2 * PI])
-
         result = wrap_2pi(angles)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert result.dtype == np.float64
@@ -134,12 +147,16 @@ class TestWrap2Pi:
     def test_list_input(self):
         result = wrap_2pi([0, PI, 2 * PI])
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [0.0, PI, 0.0])
 
     # ==================================================================================
     def test_zero_dimensional_array(self):
         result = wrap_2pi(np.array(PI))
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(PI)
@@ -148,17 +165,18 @@ class TestWrap2Pi:
     @pytest.mark.parametrize("periods", [1, 2, -1, -2])
     def test_periodicity(self, periods):
         angles = np.arange(0, 2 * PI, PI / 4)
-
         result = wrap_2pi(angles + periods * 2 * PI)
+
+        # ------------------------------------------------------------------------------
 
         assert_allclose(result, angles)
 
 
 # ======================================================================================
-# Test ang_subtract
+# Unit tests for ang_subtract function
 # ======================================================================================
 class TestAngSubtract:
-    """Tests for ang_subtract."""
+    """Test circular subtraction of angles."""
 
     # ==================================================================================
     @pytest.mark.parametrize(
@@ -175,6 +193,8 @@ class TestAngSubtract:
     def test_scalar(self, a, b, expected):
         result = ang_subtract(a, b)
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, float)
         assert result == pytest.approx(expected)
 
@@ -184,6 +204,8 @@ class TestAngSubtract:
         b = np.array([PI / 2, 0.0, 0.0])
 
         result = ang_subtract(a, b)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [-PI / 2, PI / 2, PI])
@@ -195,6 +217,8 @@ class TestAngSubtract:
 
         result = ang_subtract(a, b)
 
+        # ------------------------------------------------------------------------------
+
         assert result.shape == (2,)
         assert_allclose(result, [0.0, -PI / 2])
 
@@ -202,12 +226,16 @@ class TestAngSubtract:
     def test_list_inputs(self):
         result = ang_subtract([0, PI], [PI, 0])
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [PI, PI])
 
     # ==================================================================================
     def test_custom_angle_wrap(self):
-        result = ang_subtract(0, PI / 4, angle_wrap=wrap_2pi)
+        result = ang_subtract(0, PI / 4, angle_wrap=wrap_2pi)  # type: ignore
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(7 * PI / 4)
@@ -216,15 +244,17 @@ class TestAngSubtract:
     def test_zero_dimensional_arrays(self):
         result = ang_subtract(np.array(1.0), np.array(0.5))
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, float)
         assert result == pytest.approx(0.5)
 
 
 # ======================================================================================
-# Test azimuth
+# Unit tests for azimuth function
 # ======================================================================================
 class TestAzimuth:
-    """Tests for azimuth."""
+    """Test azimuth calculation between points."""
 
     # ==================================================================================
     @pytest.mark.parametrize(
@@ -243,12 +273,16 @@ class TestAzimuth:
     def test_scalar(self, x1, y1, x2, y2, expected):
         result = azimuth(x1, y1, x2, y2)
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, float)
         assert result == pytest.approx(expected)
 
     # ==================================================================================
     def test_coincident_points(self):
         result = azimuth(1, 1, 1, 1)
+
+        # ------------------------------------------------------------------------------
 
         assert np.isnan(result)
 
@@ -260,6 +294,8 @@ class TestAzimuth:
             [0, 1, 0, -1],
             [1, 0, -1, 0],
         )
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [0.0, PI / 2, PI, 3 * PI / 2])
@@ -273,6 +309,8 @@ class TestAzimuth:
             [0, 1, 2],
         )
 
+        # ------------------------------------------------------------------------------
+
         assert_allclose(result, np.full(3, np.nan), equal_nan=True)
 
     # ==================================================================================
@@ -283,6 +321,8 @@ class TestAzimuth:
             [0, 1],
             [1, 0],
         )
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [0.0, PI / 2])
@@ -295,6 +335,8 @@ class TestAzimuth:
             np.array(1.0),
             np.array(0.0),
         )
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(PI / 2)
@@ -309,19 +351,23 @@ class TestAzimuth:
 
         result = azimuth(x1, y1, x2, y2)
 
+        # ------------------------------------------------------------------------------
+
         assert result.shape == (3,)
         assert_allclose(result, [0.0, PI / 4, 7 * PI / 4])
 
 
 # ======================================================================================
-# Test distance_3d
+# Unit tests for distance_3d function
 # ======================================================================================
 class TestDistance3D:
-    """Tests for distance_3d."""
+    """Test three-dimensional distance calculation."""
 
     # ==================================================================================
     def test_scalar(self):
         result = distance_3d(0, 0, 0, 1, 2, 2)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(3.0)
@@ -329,6 +375,8 @@ class TestDistance3D:
     # ==================================================================================
     def test_coincident_points(self):
         result = distance_3d(1, 2, 3, 1, 2, 3)
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(0.0)
@@ -343,6 +391,8 @@ class TestDistance3D:
             [0, 2, 0],
             [0, 2, 3],
         )
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, np.ndarray)
         assert result.dtype == np.float64
@@ -359,6 +409,8 @@ class TestDistance3D:
             [0, 5],
         )
 
+        # ------------------------------------------------------------------------------
+
         assert isinstance(result, np.ndarray)
         assert_allclose(result, [5.0, 5.0])
 
@@ -372,6 +424,8 @@ class TestDistance3D:
             np.array(2.0),
             np.array(2.0),
         )
+
+        # ------------------------------------------------------------------------------
 
         assert isinstance(result, float)
         assert result == pytest.approx(3.0)
@@ -387,5 +441,7 @@ class TestDistance3D:
             np.array([0.0, 2.0, 3.0]),
         )
 
-        assert result.shape == (3,)
+        # ------------------------------------------------------------------------------
+
+        assert result.shape == (3,)  # type: ignore
         assert_allclose(result, [1.0, 2.0, 3.0])
