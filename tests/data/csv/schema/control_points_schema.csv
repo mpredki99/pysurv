@@ -1,0 +1,14 @@
+﻿field,required,unit,validator,description
+id,TRUE,,IsText(ignore=[]),Control point identifier
+x,FALSE,meter,IsNumeric(),X coordinate of the point
+u_x,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in X coordinate
+y,FALSE,meter,IsNumeric(),Y coordinate of the point
+u_y,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in Y coordinate
+z,FALSE,meter,IsNumeric(),Z coordinate of the point
+u_z,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in Z coordinate
+xi,FALSE,radian,IsNumeric(),South-North component of the deflection of the vertical
+u_xi,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in xi
+eta,FALSE,radian,IsNumeric(),West-East component of the deflection of the vertical
+u_eta,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in eta
+n,FALSE,meter,IsNumeric(),Undulation or height anomaly at the point
+u_n,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in n

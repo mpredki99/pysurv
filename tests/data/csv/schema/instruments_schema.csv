@@ -1,0 +1,12 @@
+﻿field,required,unit,validator,description
+instr_id,TRUE,,IsText(ignore=[]),Instrument identifier
+instr_b,FALSE,radian,IsNumeric(),Instrument trunnion error angle
+u_instr_b,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument trunnion error angle
+instr_c,FALSE,radian,IsNumeric(),Instrument collimation error angle
+u_instr_c,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument collimation error angle
+instr_i,FALSE,radian,IsNumeric(),Instrument index error angle
+u_instr_i,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument index error angle
+u_instr_hz,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in horizontal direction reading
+u_instr_v,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in vertical angle reading
+u_instr_sd,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in spatial distance measurement
+u_instr_sd_ppm,FALSE,,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in spatial distance measurement unit per million

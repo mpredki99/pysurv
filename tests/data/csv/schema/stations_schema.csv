@@ -1,0 +1,12 @@
+﻿field,required,unit,validator,description
+stn_id,TRUE,,IsText(ignore=[]),Station identifier
+stn_pt,TRUE,,IsText(ignore=[]),Station base point identifier
+instr_id,TRUE,,IsText(ignore=[]),Instrument identifier
+stn_h,FALSE,meter,IsNumeric(),Station height above the base point
+u_stn_h,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in station height
+stn_rx,FALSE,radian,IsNumeric(),Instrument rotation about the local X-axis
+u_stn_rx,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument rotation about the local X-axis
+stn_ry,FALSE,radian,IsNumeric(),Instrument rotation about the local Y-axis
+u_stn_ry,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument rotation about the local Y-axis
+stn_rz,FALSE,radian,IsNumeric(),Instrument orientation with respect to GLOBAL y-axis
+u_stn_rz,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in instrument orientation with respect to GLOBAL y-axis

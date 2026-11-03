@@ -1,0 +1,28 @@
+﻿field,required,unit,validator,description
+stn_id,TRUE,,IsText(ignore=[]),Station identifier
+trg_pt,TRUE,,IsText(ignore=[]),Target point identifier
+trg_id,TRUE,,IsText(ignore=[]),Target identifier
+trg_h,FALSE,meter,IsNumeric(),Target height above the base point
+u_trg_h,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target height
+u_trg_ctr,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target centering
+u_trg_tilt,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target tilt
+sd,FALSE,meter,IsNumeric(),Slope distance from the station to the target
+u_sd,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in slope distance
+hd,FALSE,meter,IsNumeric(),Horizontal distance from the station to the target
+u_hd,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in horizontal distance
+vd,FALSE,meter,IsNumeric(),Vertical distance from the station to the target
+u_vd,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in vertical distance
+dx,FALSE,meter,IsNumeric(),X-axis component of the GNSS vector from the station to the target
+u_dx,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in X-axis component of the GNSS vector
+dy,FALSE,meter,IsNumeric(),Y-axis component of the GNSS vector from the station to the target
+u_dy,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in Y-axis component of the GNSS vector
+dz,FALSE,meter,IsNumeric(),Z-axis component of the GNSS vector from the station to the target
+u_dz,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in Z-axis component of the GNSS vector
+az,FALSE,radian,IsNumeric(),Azimuth from the station to the target
+u_az,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in azimuth
+hz,FALSE,radian,IsNumeric(),Horizontal direction reading from the station to the target
+u_hz,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in horizontal direction reading
+vz,FALSE,radian,IsNumeric(),Vertical zenithal direction reading from the station to the target
+u_vz,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in vertical zenithal direction reading
+vh,FALSE,radian,IsNumeric(),Vertical direction reading from horizontal plane to the target
+u_vh,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in vertical direction reading from horizontal plane

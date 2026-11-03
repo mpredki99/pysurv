@@ -1,0 +1,8 @@
+﻿field,required,unit,validator,description
+trg_id,TRUE,,IsText(ignore=[]),Target identifier
+trg_cst,FALSE,meter,IsNumeric(),Target constant
+u_trg_cst,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target constant
+u_trg_ctr,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target centering
+u_trg_tilt,FALSE,radian,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target tilt
+trg_h,FALSE,meter,IsNumeric(),Target height above the base point
+u_trg_h,FALSE,meter,"IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1])",Uncertainty in target height
