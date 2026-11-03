@@ -177,4 +177,6 @@ def is_pysurveyor_abstract(cls: type) -> bool:
     bool
         ``True`` if ``cls`` is abstract, ``False`` otherwise.
     """
-    return cls.__dict__.get("__pysurveyor_abstract__", False)
+    return issubclass(cls, PySurveyorABC) and cls.__dict__.get(
+        "__pysurveyor_abstract__", False
+    )

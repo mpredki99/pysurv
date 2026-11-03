@@ -41,7 +41,7 @@ class ParserAccessor(Generic[SchemaParserType]):
     # ==================================================================================
     def __set_name__(self, owner: type[Any], name: str) -> None:
         """Register the instance attribute used to cache the parser."""
-        self._attr = f"_schema_parser_of_{name}"
+        self._attr = f"_schema_parser_of_{owner.__name__}"
 
     # ==================================================================================
     def __get__(
@@ -77,7 +77,7 @@ class ParserAccessor(Generic[SchemaParserType]):
             return self._on_class_access(owner)
 
         if self._attr not in obj.__dict__:
-            setattr(obj, self._attr, self._constructor(obj))
+            object.__setattr__(obj, self._attr, self._constructor(obj))
 
         return cast(SchemaParserType, obj.__dict__[self._attr])
 

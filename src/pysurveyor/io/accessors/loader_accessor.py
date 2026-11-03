@@ -27,20 +27,12 @@ class LoaderAccessor(Generic[LoaderType]):
     ----------
     _constructor : type[LoaderType]
         Loader class used to create the bound loader instance.
-    _attr : str
-        Name of the class attribute used to cache the loader instance.
     """
 
     # ==================================================================================
     def __init__(self, constructor: type[LoaderType]) -> None:
         """Initialize the accessor with the loader constructor."""
         self._constructor = constructor
-        self._attr = ""
-
-    # ==================================================================================
-    def __set_name__(self, owner: type[Any], name: str) -> None:
-        """Register the class attribute used to cache the loader."""
-        self._attr = f"_loader_of_{name}"
 
     # ==================================================================================
     def __get__(
@@ -65,7 +57,9 @@ class LoaderAccessor(Generic[LoaderType]):
         LoaderType
             Loader instance constructed with ``owner``.
         """
-        if self._attr not in owner.__dict__:
-            setattr(owner, self._attr, self._constructor(owner))
+        attr = f"_loader_of_{owner.__name__}"
 
-        return cast(LoaderType, owner.__dict__[self._attr])
+        if attr not in owner.__dict__:
+            setattr(owner, attr, self._constructor(owner))
+
+        return cast(LoaderType, owner.__dict__[attr])
