@@ -45,20 +45,32 @@ from pysurveyor.validators.abc.validator import Validator
     ],
 )
 def test_constructs_validators(expression, expected_type):
+    """Build the expected validator for each supported expression."""
     result = parse_validator(expression)
+
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, expected_type)
 
 
 # ======================================================================================
 def test_between_arguments_are_parsed():
+    """Parse both bounds of a ``Between`` validator."""
     result = parse_validator("Between(1, 15)")
+
+    # ----------------------------------------------------------------------------------
+
     assert result.minimum == 1.0  # type: ignore
     assert result.maximum == 15.0  # type: ignore
 
 
 # ======================================================================================
 def test_comparison_threshold_is_parsed():
+    """Parse the threshold of a comparison validator."""
     result = parse_validator("GreaterOrEqual(5)")
+
+    # ----------------------------------------------------------------------------------
+
     assert result.threshold == 5.0  # type: ignore
 
 
@@ -79,25 +91,40 @@ def test_comparison_threshold_is_parsed():
     ],
 )
 def test_supported_ignore_scalar_and_iterable(expression):
+    """Accept supported scalar and iterable ignore values."""
     result = parse_validator(expression)
+
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, IsNumeric)
 
 
 # ======================================================================================
 def test_ignore_string():
+    """Preserve a string ignore value."""
     result = parse_validator("IsNumeric(ignore='N/A')")
+
+    # ----------------------------------------------------------------------------------
+
     assert result.ignore == "N/A"
 
 
 # ======================================================================================
 def test_ignore_comment():
+    """Resolve the ``COMMENT`` ignore sentinel."""
     result = parse_validator("IsNumeric(ignore=COMMENT)")
+
+    # ----------------------------------------------------------------------------------
+
     assert result.ignore is COMMENT
 
 
 # ======================================================================================
 def test_ignore_lambda_callable():
+    """Parse callable ignore values and preserve their behavior."""
     result = parse_validator("IsNumeric(ignore=lambda x: x % 2 == 0)")
+
+    # ----------------------------------------------------------------------------------
 
     assert callable(result.ignore)
     assert result.ignore(4) is True
@@ -106,7 +133,11 @@ def test_ignore_lambda_callable():
 
 # ======================================================================================
 def test_ignore_regex():
+    """Parse regular-expression ignore values."""
     result = parse_validator("IsNumeric(ignore=re.compile(r'^N/A$', re.IGNORECASE))")
+
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result.ignore, re.Pattern)
     assert result.ignore.match("n/a")
 
@@ -125,24 +156,33 @@ def test_ignore_regex():
     ],
 )
 def test_ignore_empty(expression, expected_ignore_empty):
+    """Set empty-value handling for supported ignore expressions."""
     result = parse_validator(expression)
+
+    # ----------------------------------------------------------------------------------
+
     assert result.ignore_dict["empty"] is expected_ignore_empty
 
 
 # ======================================================================================
 def test_lambda_unknown_variable():
+    """Reject lambdas that reference unknown names."""
     with pytest.raises(ParseError, match="Unknown name"):
         parse_validator("IsNumeric(ignore=lambda x: y > 1)")
 
 
 # ======================================================================================
 def test_and_validator():
+    """Compose validators with the ``&`` operator."""
     result = parse_validator("IsNumeric() & GreaterOrEqual(5) & LessOrEqual(15)")
+
+    # ----------------------------------------------------------------------------------
+
     assert isinstance(result, Validator)
-    assert len(result) == 3
-    assert isinstance(result[0], IsNumeric)
-    assert isinstance(result[1], GreaterOrEqual)
-    assert isinstance(result[2], LessOrEqual)
+    assert len(result) == 3  # type: ignore
+    assert isinstance(result[0], IsNumeric)  # type: ignore
+    assert isinstance(result[1], GreaterOrEqual)  # type: ignore
+    assert isinstance(result[2], LessOrEqual)  # type: ignore
 
 
 # ======================================================================================
@@ -165,5 +205,6 @@ def test_and_validator():
     ],
 )
 def test_invalid_expressions(expression):
+    """Reject malformed or unsupported validator expressions."""
     with pytest.raises(ParseError):
         parse_validator(expression)

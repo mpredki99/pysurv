@@ -15,6 +15,7 @@ from pysurveyor.validators.utils.validator_mode import ValidatorMode
 
 # ======================================================================================
 def test_mode_on_init():
+    """Validate the initial validator mode."""
     validator = IsNumeric(mode=ValidatorMode.RETURN)
     assert validator.mode == ValidatorMode.RETURN
 
@@ -29,6 +30,7 @@ def test_mode_on_init():
 
 # ======================================================================================
 def test_mode_setter():
+    """Validate changing the validator mode."""
     validator = IsNumeric()
     assert validator.mode == ValidatorMode.RAISE
 
@@ -47,6 +49,7 @@ def test_mode_setter():
 
 # ======================================================================================
 def test_ignore_dict_groups_rule_types():
+    """Group ignored values by their rule type."""
     validator = IsNumeric(ignore=(1, COMMENT, lambda x: True))
     ignored = validator.ignore_dict
 
@@ -67,31 +70,39 @@ def test_ignore_dict_groups_rule_types():
 
 # ======================================================================================
 def test_contains():
+    """Check validator membership in a validator chain."""
     validator = Greater(0)
 
-    assert Greater in validator
+    # ----------------------------------------------------------------------------------
+
+    assert Greater in validator  # type: ignore
     assert Greater(1) in validator
-    assert GreaterOrEqual not in validator
+    assert GreaterOrEqual not in validator  # type: ignore
     assert GreaterOrEqual(0) not in validator
 
 
 # ======================================================================================
 def test_and():
+    """Combine validators with the ``&`` operator."""
     validator = IsNumeric() & Greater(0)
+
+    # ----------------------------------------------------------------------------------
 
     assert isinstance(validator, AndValidator)
 
-    # ----------------------------------------------------------------------------------
     with pytest.raises(TypeError, match="non-Validator"):
-        IsNumeric() & object()
+        IsNumeric() & object()  # type: ignore
 
 
 # ======================================================================================
 def test_chain():
+    """Preserve order and slicing for chained validators."""
     left = IsNumeric()
     middle = Less(10)
     right = Greater(0)
     validator = left & middle & right
+
+    # ----------------------------------------------------------------------------------
 
     assert list(validator) == [left, middle, right]
     assert len(validator) == 3
@@ -99,4 +110,4 @@ def test_chain():
     assert validator[1] is middle
     assert validator[-1] is right
     assert isinstance(validator[1:], AndValidator)
-    assert list(validator[1:]) == [middle, right]
+    assert list(validator[1:]) == [middle, right]  # type: ignore

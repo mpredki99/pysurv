@@ -18,8 +18,11 @@ class TestIsNumeric:
 
     # ==================================================================================
     def test_empty(self, numeric_data):
+        """Accept an empty input without validation errors."""
         is_numeric = IsNumeric()
         mask, values = is_numeric(numeric_data.empty)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.empty
         assert mask.dtype == bool
@@ -28,62 +31,86 @@ class TestIsNumeric:
 
     # ==================================================================================
     def test_valid(self, numeric_data):
+        """Accept numeric values without conversion."""
         is_numeric = IsNumeric()
         mask, values = is_numeric(numeric_data.valid)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert values.equals(numeric_data.valid)
 
     # ==================================================================================
     def test_invalid(self, numeric_data):
+        """Reject values that cannot be converted to numbers."""
         is_numeric = IsNumeric()
+
+        # ------------------------------------------------------------------------------
 
         with pytest.raises(ValidationError, match="Invalid data found"):
             is_numeric(numeric_data.invalid)
 
     # ==================================================================================
     def test_convertible(self, numeric_data):
+        """Convert numeric strings to numeric values."""
         is_numeric = IsNumeric()
         mask, values = is_numeric(numeric_data.convertible)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert values.equals(numeric_data.valid)
 
     # ==================================================================================
     def test_with_empty(self, numeric_data):
+        """Allow empty values by default."""
         is_numeric = IsNumeric()
         mask, values = is_numeric(numeric_data.with_empty)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert values.isna().sum() == 3
 
     # ==================================================================================
     def test_no_ignore(self, numeric_data):
+        """Reject empty values when ignoring is disabled."""
         is_numeric = IsNumeric(ignore=[])
+
+        # ------------------------------------------------------------------------------
 
         with pytest.raises(ValidationError):
             is_numeric(numeric_data.with_empty)
 
     # ==================================================================================
     def test_ignore_literal(self, numeric_data):
-        is_numeric = IsNumeric(ignore=(0, 1))
-        mask, values = is_numeric(numeric_data.valid)
+        """Ignore configured literal values during numeric conversion."""
+        is_numeric = IsNumeric(ignore=("A", False))
+        mask, values = is_numeric(numeric_data.literal)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
-        assert not values.isin([0, 1]).any()
+        assert not values.isin(["A", False]).any()
 
     # ==================================================================================
     def test_ignore_regex(self, numeric_data):
+        """Ignore values matching the configured comment pattern."""
         is_numeric = IsNumeric()
         mask, values = is_numeric(numeric_data.regex)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert not values.isin([0, 1, 2]).any()
 
     # ==================================================================================
     def test_ignore_callable(self, numeric_data):
+        """Ignore values matched by a callable."""
         is_numeric = IsNumeric(ignore=[None, lambda x: x % 2 == 0])
         mask, values = is_numeric(numeric_data.callable)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert not values.isin([-2, 0, 2]).any()
@@ -97,8 +124,11 @@ class TestIsText:
 
     # ==================================================================================
     def test_empty(self, text_data):
+        """Accept an empty input without validation errors."""
         is_text = IsText()
         mask, values = is_text(text_data.empty)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.empty
         assert mask.dtype == bool
@@ -107,45 +137,65 @@ class TestIsText:
 
     # ==================================================================================
     def test_valid(self, text_data):
+        """Accept text values without conversion."""
         is_text = IsText()
         mask, values = is_text(text_data.valid)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert list(values) == list(text_data.valid)
 
     # ==================================================================================
     def test_convertible(self, text_data):
+        """Convert supported values to text."""
         is_text = IsText()
         mask, values = is_text(text_data.convertible)
+
+        # ------------------------------------------------------------------------------
+
         assert mask.all()
         assert values.dtype == "str"
 
     # ==================================================================================
     def test_with_empty(self, text_data):
+        """Allow empty values by default."""
         is_text = IsText()
         mask, values = is_text(text_data.with_empty)
+
+        # ------------------------------------------------------------------------------
+
         assert mask.all()
         assert values.isna().sum() == 2
 
     # ==================================================================================
     def test_no_ignore(self, text_data):
+        """Reject empty values when ignoring is disabled."""
         is_text = IsText(ignore=[])
+
+        # ------------------------------------------------------------------------------
 
         with pytest.raises(ValidationError):
             is_text(text_data.with_empty)
 
     # ==================================================================================
     def test_ignore_literal(self, text_data):
-        is_text = IsText(ignore=("a", "b"))
-        mask, values = is_text(text_data.valid)
+        """Ignore configured literal values during text conversion."""
+        is_text = IsText(ignore=(1, True))
+        mask, values = is_text(text_data.literal)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
-        assert not values.isin(["a", "b"]).any()
+        assert not values.isin([1, True]).any()
 
     # ==================================================================================
     def test_ignore_regex(self, text_data):
+        """Ignore values matching the configured comment pattern."""
         is_text = IsText()
         mask, values = is_text(text_data.regex)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert not values.isin(
@@ -154,8 +204,11 @@ class TestIsText:
 
     # ==================================================================================
     def test_ignore_callable(self, text_data):
+        """Ignore values matched by a callable."""
         is_text = IsText(ignore=lambda x: str(x).isdigit())
         mask, values = is_text(text_data.callable)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert not values.isin(["1", "2", "3"]).any()
@@ -169,8 +222,11 @@ class TestIsBoolean:
 
     # ==================================================================================
     def test_empty(self, boolean_data):
+        """Accept an empty input without validation errors."""
         is_boolean = IsBoolean()
         mask, values = is_boolean(boolean_data.empty)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.empty
         assert mask.dtype == bool
@@ -179,56 +235,75 @@ class TestIsBoolean:
 
     # ==================================================================================
     def test_valid(self, boolean_data):
+        """Accept boolean values without conversion."""
         is_boolean = IsBoolean()
         mask, values = is_boolean(boolean_data.valid)
+
+        # ------------------------------------------------------------------------------
 
         assert mask.all()
         assert list(values) == list(boolean_data.valid)
 
     # ==================================================================================
     def test_invalid(self, boolean_data):
+        """Reject values that cannot be converted to booleans."""
         is_boolean = IsBoolean()
+
+        # ------------------------------------------------------------------------------
 
         with pytest.raises(ValidationError, match="Invalid data found"):
             is_boolean(boolean_data.invalid)
 
     # ==================================================================================
     def test_convertible(self, boolean_data):
+        """Convert supported values to booleans."""
         is_boolean = IsBoolean()
         mask, values = is_boolean(boolean_data.convertible)
 
         assert mask.all()
         assert values.dtype == "boolean"
 
-    # # ==================================================================================
-    # def test_no_ignore(self, boolean_data):
-    #     is_boolean = IsBoolean(ignore=[])
+    # ==================================================================================
+    def test_no_ignore(self, boolean_data):
+        """Reject empty values when ignoring is disabled."""
+        is_boolean = IsBoolean(ignore=[])
 
-    #     with pytest.raises(ValidationError):
-    #         is_boolean(boolean_data.with_empty)
+        # ------------------------------------------------------------------------------
 
-    # # ==================================================================================
-    # def test_ignore_literal(self, boolean_data):
-    #     is_boolean = IsBoolean(ignore=(False))
-    #     mask, values = is_boolean(boolean_data.with_empty)
+        with pytest.raises(ValidationError):
+            is_boolean(boolean_data.with_empty)
 
-    #     assert mask.all()
-    #     assert not values.isin([False]).any()
+    # ==================================================================================
+    def test_ignore_literal(self, boolean_data):
+        """Ignore configured literal values during boolean conversion."""
+        is_boolean = IsBoolean(ignore=["A", 1])
+        mask, values = is_boolean(boolean_data.literal)
 
-    # # # ==================================================================================
-    # def test_ignore_regex(self, boolean_data):
-    #     is_text = IsText()
-    #     mask, values = is_text(text_data.regex)
+        # ------------------------------------------------------------------------------
 
-    #     assert mask.all()
-    #     assert not values.isin(
-    #         ["# comment", "  # leading space", "\t# leading tab"]
-    #     ).any()
+        assert mask.all()
+        assert not values.isin(["A", 1]).any()
 
-    # # ==================================================================================
-    # def test_ignore_callable(self, boolean_data):
-    #     is_text = IsText(ignore=lambda x: str(x).isdigit())
-    #     mask, values = is_text(text_data.callable)
+    # ==================================================================================
+    def test_ignore_regex(self, boolean_data):
+        """Ignore values matching the configured comment pattern."""
+        is_boolean = IsBoolean()
+        mask, values = is_boolean(boolean_data.regex)
 
-    #     assert mask.all()
-    #     assert not values.isin(["1", "2", "3"]).any()
+        # ------------------------------------------------------------------------------
+
+        assert mask.all()
+        assert not values.isin(
+            ["# comment", "  # leading space", "\t# leading tab"]
+        ).any()
+
+    # ==================================================================================
+    def test_ignore_callable(self, boolean_data):
+        """Ignore values matched by a callable."""
+        is_text = IsBoolean(ignore=lambda x: x % 10 == 0)
+        mask, values = is_text(boolean_data.callable)
+
+        # ------------------------------------------------------------------------------
+
+        assert mask.all()
+        assert not values.isin([10, 100]).any()
