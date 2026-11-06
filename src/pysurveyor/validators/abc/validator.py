@@ -10,8 +10,9 @@ from collections.abc import Iterable, Iterator
 import re
 from typing import Any, Callable
 
+import pandas as pd
+
 from pysurveyor.abc.pysurveyor_abc import PySurveyorABC
-from pysurveyor.backend.backend import NA, Index, Series, isna
 from pysurveyor.exceptions.exceptions import ValidationError
 from pysurveyor.validators.utils.constants import COMMENT
 from pysurveyor.validators.utils.validator_mode import ValidatorMode
@@ -35,7 +36,7 @@ class Validator(PySurveyorABC):
     def __init__(
         self,
         *,
-        ignore: Iterable[Any] | Any = (NA, COMMENT),
+        ignore: Iterable[Any] | Any = (pd.NA, COMMENT),
         mode: ValidatorMode | str = ValidatorMode.RAISE,
     ) -> None:
         """Initialize ignore rules and choose how validation results are handled."""
@@ -54,8 +55,8 @@ class Validator(PySurveyorABC):
     @abstractmethod
     def __call__(
         self,
-        data: Series,
-    ) -> tuple[Series, Series]:
+        data: pd.Series,
+    ) -> tuple[pd.Series, pd.Series]:
         """Validate ``data`` and return ``(validity_mask, data)``.
 
         The mask is indexed like ``data`` and contain ``True`` for rows
@@ -159,7 +160,7 @@ class Validator(PySurveyorABC):
 
         # ------------------------------------------------------------------------------
         for value in raw_values:
-            if value is None or value is NA:
+            if value is None or value is pd.NA:
                 ignore_na = True
             # --------------------------------------------------------------------------
             elif isinstance(value, re.Pattern):
@@ -192,9 +193,9 @@ class Validator(PySurveyorABC):
     # ==================================================================================
     # Private methods
     # ==================================================================================
-    def _ignored_mask(self, data: Series) -> Series:
+    def _ignored_mask(self, data: pd.Series) -> pd.Series:
         """Build a boolean mask whose true entries should be excluded from checks."""
-        mask = Series(False, index=data.index)
+        mask = pd.Series(False, index=data.index)
 
         # Missing values ---------------------------------------------------------------
         if self._ignore_na:
@@ -215,7 +216,7 @@ class Validator(PySurveyorABC):
             for predicate in self._ignore_callables:
                 mask |= data.apply(
                     lambda value, predicate=predicate: (
-                        False if isna(value) else predicate(value)
+                        False if pd.isna(value) else predicate(value)
                     )
                 )
 
@@ -225,10 +226,10 @@ class Validator(PySurveyorABC):
     # ==================================================================================
     def _return_validation_result(
         self,
-        mask: Series,
-        data: Series,
+        mask: pd.Series,
+        data: pd.Series,
         error_message: str = "Invalid values found:",
-    ) -> tuple[Series, Series]:
+    ) -> tuple[pd.Series, pd.Series]:
         """Return the mask and data, or raise if RAISE mode finds invalid rows.
 
         Parameters
@@ -246,19 +247,21 @@ class Validator(PySurveyorABC):
 
     # ==================================================================================
     @staticmethod
-    def _raise_validation_error(invalid_values: Series, message: str) -> None:
+    def _raise_validation_error(invalid_values: pd.Series, message: str) -> None:
         """Raise ``ValidationError`` with invalid values and their row labels."""
         formatted = invalid_values.rename("value").rename_axis("row").reset_index()
         raise ValidationError(f"{message}\n{formatted.to_string(index=False)}")
 
     # ==================================================================================
     @staticmethod
-    def _return_empty(dtype: type | str, index: Index) -> tuple[Series, Series]:
+    def _return_empty(
+        dtype: type | str, index: pd.Index
+    ) -> tuple[pd.Series, pd.Series]:
         """Create an empty boolean result Series and an empty data Series.
 
         Both Series use the supplied index; the data Series uses ``dtype``.
         """
-        return Series(dtype=bool, index=index), Series(dtype=dtype, index=index)
+        return pd.Series(dtype=bool, index=index), pd.Series(dtype=dtype, index=index)
 
 
 # ======================================================================================
@@ -281,7 +284,7 @@ class AndValidator(Validator):
         self.mode = mode
 
     # ==================================================================================
-    def __call__(self, data: Series) -> tuple[Series, Series]:
+    def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Run both validators in sequence and combine their validity masks.
 
         The right validator receives the data returned by the left validator.

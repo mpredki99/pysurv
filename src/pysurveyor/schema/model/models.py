@@ -3,7 +3,8 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE and COPYING files.
 
-from pysurveyor.backend.backend import DataFrame
+import pandas as pd
+
 from pysurveyor.schema.model.control_points_model import get_control_points_model_data
 from pysurveyor.schema.model.instruments_model import get_instruments_model_data
 from pysurveyor.schema.model.measurements_model import get_measurements_model_data
@@ -22,37 +23,37 @@ class Models:
     # Properties for lazy loading of models
     # ==================================================================================
     @property
-    def points(self) -> DataFrame:
+    def points(self) -> pd.DataFrame:
         data = get_points_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def control_points(self) -> DataFrame:
+    def control_points(self) -> pd.DataFrame:
         data = get_control_points_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def stations(self) -> DataFrame:
+    def stations(self) -> pd.DataFrame:
         data = get_stations_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def instruments(self) -> DataFrame:
+    def instruments(self) -> pd.DataFrame:
         data = get_instruments_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def targets(self) -> DataFrame:
+    def targets(self) -> pd.DataFrame:
         data = get_targets_model_data()
         return self._build_model(data)
 
     # ==================================================================================
     @property
-    def measurements(self) -> DataFrame:
+    def measurements(self) -> pd.DataFrame:
         data = get_measurements_model_data()
         return self._build_model(data)
 
@@ -60,10 +61,10 @@ class Models:
     # Private method to build a DataFrame from model data
     # ==================================================================================
     @staticmethod
-    def _build_model(model_data) -> DataFrame:
+    def _build_model(model_data) -> pd.DataFrame:
         """Builds a DataFrame from the provided model data dictionary."""
 
-        model = DataFrame.from_dict(
+        model = pd.DataFrame.from_dict(
             model_data,
             columns=["required", "unit", "validator", "description"],
             orient="index",

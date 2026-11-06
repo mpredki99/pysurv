@@ -7,8 +7,9 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+import pandas as pd
+
 from pysurveyor.abc.pysurveyor_abc import ABSTRACT_CLASS_ATTRIBUTE
-from pysurveyor.backend.backend import NA, DataFrame, Index
 from pysurveyor.basic.units import Unit
 from pysurveyor.schema.abc.schema import Schema
 from pysurveyor.schema.utils.model_validation import (
@@ -63,14 +64,14 @@ class StrictSchema(Schema[LoaderType]):
         "description": str,
     }
     # ----------------------------------------------------------------------------------
-    _expected_index = cast(Index, ABSTRACT_CLASS_ATTRIBUTE)
+    _expected_index = cast(pd.Index, ABSTRACT_CLASS_ATTRIBUTE)
 
     # ==================================================================================
     # Dunder methods
     # ==================================================================================
     def __init__(
         self,
-        model: DataFrame,
+        model: pd.DataFrame,
         validation_mode: ValidationMode | str = ValidationMode.LAZY,
     ) -> None:
         """Initialize the schema and validate its model."""
@@ -159,17 +160,17 @@ class StrictSchema(Schema[LoaderType]):
     # Expose model index and columns with copies to prevent external modification
     # ==================================================================================
     @property
-    def index(self) -> Index:
+    def index(self) -> pd.Index:
         """Return a deep copy of the model's index."""
         return self._model.index.copy(deep=True)
 
     @property
-    def columns(self) -> Index:
+    def columns(self) -> pd.Index:
         """Return a deep copy of the model's columns."""
         return self._model.columns.copy(deep=True)
 
     @property
-    def data_columns(self) -> Index:
+    def data_columns(self) -> pd.Index:
         """Return a deep copy of the data column names."""
         return self._model.index.copy(deep=True)
 

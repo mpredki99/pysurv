@@ -5,24 +5,24 @@
 
 from collections.abc import Set
 
-from pysurveyor.backend.backend import DataFrame, Index, RangeIndex, isna
+import pandas as pd
 
 
 # ======================================================================================
 # Model validation for PySurveyor schemas
 # ======================================================================================
 def validate_model(
-    model: DataFrame,
+    model: pd.DataFrame,
     expected_columns: dict[str, type],
-    expected_index: Index,
+    expected_index: pd.Index,
     schema_name: str,
-) -> DataFrame:
+) -> pd.DataFrame:
     """Standardize and validate a model's index, columns, and non-null column values."""
 
     expected_index_name = expected_index.name
     # ----------------------------------------------------------------------------------
     if expected_index_name in model.columns:
-        if not isinstance(model.index, RangeIndex):
+        if not isinstance(model.index, pd.RangeIndex):
             raise ValueError(
                 f"Cannot set index for {schema_name}: column {expected_index_name!r} "
                 f"exists, but the model already has an index {model.index.name!r}."
@@ -37,9 +37,9 @@ def validate_model(
 
 # ======================================================================================
 def assert_valid_model(
-    model: DataFrame,
+    model: pd.DataFrame,
     expected_columns: dict[str, type],
-    expected_index: Index,
+    expected_index: pd.Index,
     schema_name: str,
 ) -> None:
     """Validate a model's index, columns, and non-null column values."""
@@ -48,7 +48,9 @@ def assert_valid_model(
 
 
 # ======================================================================================
-def assert_valid_index(index: Index, expected_index: Index, schema_name: str) -> None:
+def assert_valid_index(
+    index: pd.Index, expected_index: pd.Index, schema_name: str
+) -> None:
     """Validate the index name and labels, ignoring label order."""
     if (
         index.name == expected_index.name
@@ -70,7 +72,7 @@ def assert_valid_index(index: Index, expected_index: Index, schema_name: str) ->
 
 # ======================================================================================
 def assert_valid_columns(
-    model: DataFrame, expected_columns: dict[str, type], schema_name: str
+    model: pd.DataFrame, expected_columns: dict[str, type], schema_name: str
 ) -> None:
     """Validate column names and non-null values against expected types."""
 
@@ -82,7 +84,7 @@ def assert_valid_columns(
 
 # ======================================================================================
 def assert_valid_columns_existence(
-    columns: Index, expected_columns: Set[str], schema_name: str
+    columns: pd.Index, expected_columns: Set[str], schema_name: str
 ) -> None:
     """Validate column names against expected types."""
     if (
@@ -106,7 +108,7 @@ def assert_valid_columns_existence(
 
 # ======================================================================================
 def assert_valid_columns_values(
-    model: DataFrame, expected_columns: dict[str, type], schema_name: str
+    model: pd.DataFrame, expected_columns: dict[str, type], schema_name: str
 ) -> None:
     """Validate column names and non-null values against expected types."""
 
@@ -114,7 +116,7 @@ def assert_valid_columns_values(
     for col, dtype in expected_columns.items():
         # ------------------------------------------------------------------------------
         if col == "required":
-            if [value for value in model[col] if isna(value)]:
+            if [value for value in model[col] if pd.isna(value)]:
                 raise ValueError(
                     f"Column 'required' in {schema_name} cannot contain empty values."
                 )
@@ -123,7 +125,7 @@ def assert_valid_columns_values(
         invalid_values = [
             value
             for value in model[col]
-            if not isna(value) and not isinstance(value, dtype)
+            if not pd.isna(value) and not isinstance(value, dtype)
         ]
         # ------------------------------------------------------------------------------
         if invalid_values:

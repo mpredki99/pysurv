@@ -6,7 +6,8 @@
 from abc import abstractmethod
 from typing import Any, ClassVar
 
-from pysurveyor.backend.backend import Series
+import pandas as pd
+
 from pysurveyor.validators.abc.validator import Validator
 
 
@@ -34,7 +35,7 @@ class ConversionValidator(Validator):
         return super().__str__() + "()"
 
     # ==================================================================================
-    def __call__(self, data: Series) -> tuple[Series, Series]:
+    def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Convert ``data`` and return its validity mask and converted values."""
         if data.empty:
             return self._return_empty(self._output_dtype, data.index)
@@ -53,6 +54,6 @@ class ConversionValidator(Validator):
     # Conversion implementation
     # ==================================================================================
     @abstractmethod
-    def _convert(self, data: Series) -> Series:
+    def _convert(self, data: pd.Series) -> pd.Series:
         """Convert ``data`` and represent unsuccessful conversions as missing."""
         pass

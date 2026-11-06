@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from pysurveyor.backend.backend import NA
 from pysurveyor.schema.utils.model_validation import assert_valid_model
 
 

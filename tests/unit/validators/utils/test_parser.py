@@ -9,7 +9,6 @@ import re
 
 import pytest
 
-from pysurveyor.backend.backend import NA
 from pysurveyor.exceptions import ParseError
 from pysurveyor.validators import (
     COMMENT,

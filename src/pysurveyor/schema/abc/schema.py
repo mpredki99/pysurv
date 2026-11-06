@@ -8,8 +8,9 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Self, cast
 
+import pandas as pd
+
 from pysurveyor.abc.pysurveyor_abc import ABSTRACT_CLASS_ATTRIBUTE
-from pysurveyor.backend.backend import NA, DataFrame, Index, isna
 from pysurveyor.exceptions.exceptions import ValidationError
 from pysurveyor.io.abc.table import Table
 from pysurveyor.io.accessors.parser_accessor import ParserAccessor
@@ -49,7 +50,7 @@ class Schema(Table[LoaderType]):
     # ==================================================================================
     def __init__(
         self,
-        model: DataFrame,
+        model: pd.DataFrame,
         validation_mode: ValidationMode | str = ValidationMode.LAZY,
     ) -> None:
         """Initialize a schema from a tabular model."""
@@ -63,12 +64,12 @@ class Schema(Table[LoaderType]):
     # Properties
     # ==================================================================================
     @property
-    def _model(self) -> DataFrame:
+    def _model(self) -> pd.DataFrame:
         """Return the schema model."""
         return self._data
 
     @_model.setter
-    def _model(self, value: DataFrame) -> None:
+    def _model(self, value: pd.DataFrame) -> None:
         """Set the schema model."""
         self._data = value
 
@@ -90,7 +91,7 @@ class Schema(Table[LoaderType]):
 
     # ==================================================================================
     @property
-    def data_columns(self) -> Index:
+    def data_columns(self) -> pd.Index:
         """Return the data column names."""
         return self._model.index
 
@@ -175,7 +176,7 @@ class Schema(Table[LoaderType]):
             validator = validators[field]
 
             # --------------------------------------------------------------------------
-            if isna(validator):
+            if pd.isna(validator):
                 continue
 
             # Ensure validator is in RAISE mode for eager validation -------------------
@@ -214,7 +215,7 @@ class Schema(Table[LoaderType]):
 
         # ------------------------------------------------------------------------------
         if invalid.any().any():
-            data[invalid] = NA
+            data[invalid] = pd.NA
 
         # ------------------------------------------------------------------------------
         return data
@@ -222,7 +223,7 @@ class Schema(Table[LoaderType]):
     # ==================================================================================
     # Validation helper method
     # ==================================================================================
-    def _evaluate_data(self, data: DataTable) -> tuple[DataFrame, DataTable]:
+    def _evaluate_data(self, data: DataTable) -> tuple[pd.DataFrame, DataTable]:
         """Validate data. Accumulate invalid values and return it with the data."""
         invalid_masks = {}
         validators = self._model["validator"]
@@ -235,7 +236,7 @@ class Schema(Table[LoaderType]):
             validator = validators[field]
 
             # --------------------------------------------------------------------------
-            if isna(validator):
+            if pd.isna(validator):
                 continue
 
             # Avoid mutating validator object stored in schema model -------------------
@@ -251,7 +252,7 @@ class Schema(Table[LoaderType]):
 
         # ------------------------------------------------------------------------------
         if not invalid_masks:
-            return DataFrame(index=data.index), data
+            return pd.DataFrame(index=data.index), data
 
-        invalid = DataFrame(invalid_masks, index=data.index)
+        invalid = pd.DataFrame(invalid_masks, index=data.index)
         return invalid, data

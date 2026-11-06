@@ -7,8 +7,9 @@ from __future__ import annotations
 
 from typing import Any, Generic, Self, cast
 
+import pandas as pd
+
 from pysurveyor.abc.pysurveyor_abc import ABSTRACT_CLASS_ATTRIBUTE
-from pysurveyor.backend.backend import DataFrame
 from pysurveyor.io.abc.table import Table
 from pysurveyor.typing.vars import LoaderType, SchemaType
 
@@ -39,7 +40,7 @@ class DataTable(Table[LoaderType], Generic[SchemaType, LoaderType]):
     default_schema = cast(SchemaType, ABSTRACT_CLASS_ATTRIBUTE)
 
     # ==================================================================================
-    def __init__(self, data: DataFrame, schema: SchemaType | None = None) -> None:
+    def __init__(self, data: pd.DataFrame, schema: SchemaType | None = None) -> None:
         """Initialize a data table and associate its schema."""
         super().__init__(data)
         self._schema = schema or self.__class__.default_schema.copy(deep=True)

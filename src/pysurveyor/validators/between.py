@@ -6,7 +6,8 @@
 from collections.abc import Iterable
 from typing import Any, Literal, cast
 
-from pysurveyor.backend.backend import NA, Series
+import pandas as pd
+
 from pysurveyor.validators.abc.validator import Validator
 from pysurveyor.validators.comparison_validators import (
     Greater,
@@ -46,7 +47,7 @@ class Between(Validator):
         maximum: float,
         *,
         inclusive: Inclusivity = "left",
-        ignore: Iterable[Any] | Any = (NA, COMMENT),
+        ignore: Iterable[Any] | Any = (pd.NA, COMMENT),
         mode: ValidatorMode | str = ValidatorMode.RAISE,
     ) -> None:
         """Initialize the range limits and validation configuration."""
@@ -73,7 +74,7 @@ class Between(Validator):
         )
 
     # ==================================================================================
-    def __call__(self, data: Series) -> tuple[Series, Series]:
+    def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Validate ``data`` using the configured numeric range."""
         if data.empty:
             return self._return_empty(int, data.index)

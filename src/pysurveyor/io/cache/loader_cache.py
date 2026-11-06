@@ -12,7 +12,8 @@ from pathlib import Path
 from types import TracebackType
 from typing import Callable, ClassVar, Hashable
 
-from pysurveyor.backend.backend import DataFrame
+import pandas as pd
+
 from pysurveyor.io.cache.cache_keys import FileCacheKey
 
 
@@ -40,7 +41,7 @@ class LoaderCache:
     def __init__(self, enabled: bool | None = None) -> None:
         """Create an empty cache."""
         self._enabled = enabled
-        self._cached_data: dict[Hashable, DataFrame] = {}
+        self._cached_data: dict[Hashable, pd.DataFrame] = {}
 
     # ==================================================================================
     @property
@@ -79,10 +80,10 @@ class LoaderCache:
     def get_data(
         self,
         key: Hashable,
-        loader: Callable[[], DataFrame],
+        loader: Callable[[], pd.DataFrame],
         *,
         copy: bool = True,
-    ) -> DataFrame:
+    ) -> pd.DataFrame:
         """Load a data frame from the cache or use the loader to read it.
 
         Parameters:

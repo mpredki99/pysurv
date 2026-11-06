@@ -5,15 +5,8 @@
 
 from typing import Any
 
-from pysurveyor.backend.backend import (
-    NA,
-    NAType,
-    Series,
-    is_bool,
-    is_number,
-    isna,
-    to_numeric,
-)
+import pandas as pd
+
 from pysurveyor.validators.abc.conversion_validator import ConversionValidator
 
 
@@ -27,9 +20,9 @@ class IsNumeric(ConversionValidator):
     _fill_value = float("nan")
 
     # ==================================================================================
-    def _convert(self, data: Series) -> Series:
+    def _convert(self, data: pd.Series) -> pd.Series:
         """Convert values to numbers and coerce invalid values to missing."""
-        return to_numeric(data, errors="coerce")
+        return pd.to_numeric(data, errors="coerce")
 
 
 # ======================================================================================
@@ -39,10 +32,10 @@ class IsText(ConversionValidator):
     """Validate and convert values to a text Series."""
 
     _output_dtype = "str"
-    _fill_value = NA
+    _fill_value = pd.NA
 
     # ==================================================================================
-    def _convert(self, data: Series) -> Series:
+    def _convert(self, data: pd.Series) -> pd.Series:
         """Convert values to strings."""
         return data.astype("str")
 
@@ -57,21 +50,25 @@ class IsBoolean(ConversionValidator):
     _fill_value = False
 
     # ==================================================================================
-    def _convert(self, data: Series) -> Series:
+    def _convert(self, data: pd.Series) -> pd.Series:
         """Convert values to boolean."""
 
         # Define a helper function to convert individual values to boolean or NA -------
-        def to_bool_or_na(value: Any) -> bool | NAType:
-            if isna(value):
-                return NA
+        def to_bool_or_na(value: Any) -> bool | type(pd.NA):  # type: ignore
+            if pd.isna(value):
+                return pd.NA
 
             # --------------------------------------------------------------------------
-            if is_bool(value):
-                return bool(value)
+            if isinstance(value, bool):
+                return value
 
             # --------------------------------------------------------------------------
-            if is_number(value):
-                return {0: False, 1: True}.get(value, NA)
+            if pd.api.types.is_number(value):
+                if value == 0:
+                    return False
+                if value == 1:
+                    return True
+                return pd.NA
 
             # --------------------------------------------------------------------------
             if isinstance(value, str):
@@ -86,7 +83,7 @@ class IsBoolean(ConversionValidator):
                 try:
                     number = float(value)
                 except ValueError:
-                    return NA
+                    return pd.NA
 
                 # ----------------------------------------------------------------------
                 if number == 1:
@@ -95,7 +92,7 @@ class IsBoolean(ConversionValidator):
                     return False
 
             # --------------------------------------------------------------------------
-            return NA
+            return pd.NA
 
         # ------------------------------------------------------------------------------
         return data.map(to_bool_or_na).astype("boolean")

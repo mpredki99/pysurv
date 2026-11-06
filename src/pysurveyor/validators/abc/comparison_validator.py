@@ -7,8 +7,9 @@ from collections.abc import Iterable
 from numbers import Number
 from typing import Any, Callable, cast
 
+import pandas as pd
+
 from pysurveyor.abc.pysurveyor_abc import ABSTRACT_CLASS_ATTRIBUTE
-from pysurveyor.backend.backend import NA, Series
 from pysurveyor.validators.abc.validator import Validator
 from pysurveyor.validators.utils.constants import COMMENT
 from pysurveyor.validators.utils.validator_mode import ValidatorMode
@@ -36,7 +37,7 @@ class ComparisonValidator(Validator):
         self,
         threshold: float,
         *,
-        ignore: Iterable[Any] | Any = (NA, COMMENT),
+        ignore: Iterable[Any] | Any = (pd.NA, COMMENT),
         mode: ValidatorMode | str = ValidatorMode.RAISE,
     ) -> None:
         """Initialize the comparison threshold and validation configuration."""
@@ -49,7 +50,7 @@ class ComparisonValidator(Validator):
         return super().__str__() + f"({self.threshold})"
 
     # ==================================================================================
-    def __call__(self, data: Series) -> tuple[Series, Series]:
+    def __call__(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Compare ``data`` with the threshold and return validity results.
 
         Ignored values are marked valid. If comparison raises ``TypeError``,
@@ -59,7 +60,7 @@ class ComparisonValidator(Validator):
             return self._return_empty(int, data.index)
 
         # ------------------------------------------------------------------------------
-        comparison = Series(False, index=data.index)
+        comparison = pd.Series(False, index=data.index)
         ignored = self._ignored_mask(data)
 
         try:
@@ -91,7 +92,7 @@ class ComparisonValidator(Validator):
     # ==================================================================================
     # Private methods
     # ==================================================================================
-    def _on_type_error(self, data: Series) -> tuple[Series, Series]:
+    def _on_type_error(self, data: pd.Series) -> tuple[pd.Series, pd.Series]:
         """Handle non-numeric values after a failed comparison."""
         mask = self._ignored_mask(data) | data.apply(lambda x: isinstance(x, Number))
         return self._return_validation_result(

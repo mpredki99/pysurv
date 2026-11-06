@@ -8,9 +8,8 @@
 from types import SimpleNamespace
 
 import numpy as np
+from pandas import NA, Series
 import pytest
-
-from pysurveyor.backend.backend import NA, Series
 
 
 # ======================================================================================

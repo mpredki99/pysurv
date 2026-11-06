@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from pysurveyor.backend.backend import DataFrame
+import pandas as pd
+
 from pysurveyor.io.accessors.loader_accessor import LoaderAccessor
 from pysurveyor.io.accessors.parser_accessor import ParserAccessor
 from pysurveyor.io.loader.schema_loader import SchemaLoader
@@ -33,7 +34,7 @@ class MeasurementsSchema(StrictSchema[SchemaLoader]):
 
     def __init__(
         self,
-        model: DataFrame | None = None,
+        model: pd.DataFrame | None = None,
         validation_mode: ValidationMode | str = ValidationMode.LAZY,
     ) -> None:
         # ------------------------------------------------------------------------------

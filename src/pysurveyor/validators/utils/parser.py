@@ -11,7 +11,8 @@ import operator
 import re
 from typing import Any
 
-from pysurveyor.backend.backend import NA
+import pandas as pd
+
 from pysurveyor.exceptions.exceptions import ParseError
 from pysurveyor.validators.abc.validator import Validator
 from pysurveyor.validators.between import Between
@@ -159,10 +160,10 @@ class _Evaluator:
             raise ParseError(f"Unknown name: {node.id!r}")
 
         if isinstance(node, ast.Attribute):
-            # backend missing-value are recognized -------------------------------------
+            # pandas missing-value are recognized --------------------------------------
             if isinstance(node.value, ast.Name) and node.value.id in ["pd", "pandas"]:
                 if node.attr == "NA":
-                    return NA
+                    return pd.NA
 
             # regex flags are recognized -----------------------------------------------
             if isinstance(node.value, ast.Name) and node.value.id == "re":

@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from typing import Any, overload
 
-from pysurveyor.backend.backend import DataFrame, Index, Series
+import pandas as pd
+
 from pysurveyor.io.abc.pysurveyor_io import PySurveyorIO
 from pysurveyor.typing.vars import LoaderType
 
@@ -36,7 +37,7 @@ class Table(PySurveyorIO[LoaderType]):
     # ==================================================================================
     # Dunder methods
     # ==================================================================================
-    def __init__(self, data: DataFrame) -> None:
+    def __init__(self, data: pd.DataFrame) -> None:
         """Initialize a table with its underlying data."""
         super().__init__()
         self._data = data
@@ -65,19 +66,19 @@ class Table(PySurveyorIO[LoaderType]):
     # Properties
     # ==================================================================================
     @property
-    def index(self) -> Index:
+    def index(self) -> pd.Index:
         """Return the index of the underlying data."""
         return self._data.index
 
     # ==================================================================================
     @property
-    def columns(self) -> Index:
+    def columns(self) -> pd.Index:
         """Return the column names of the table."""
         return self._data.columns
 
     # ==================================================================================
     @property
-    def dtypes(self) -> Series[Any]:
+    def dtypes(self) -> pd.Series[Any]:
         """Return the data types of the underlying data."""
         return self._data.dtypes
 
@@ -111,7 +112,7 @@ class Table(PySurveyorIO[LoaderType]):
     # Backend methods
     # ==================================================================================
     @overload
-    def equals(self, other: DataFrame) -> bool:
+    def equals(self, other: pd.DataFrame) -> bool:
         """Check if the underlying data is equal to another table's data."""
         ...
 
@@ -120,9 +121,9 @@ class Table(PySurveyorIO[LoaderType]):
         """Check if the underlying data is equal to another table's data."""
         ...
 
-    def equals(self, other: Table | DataFrame) -> bool:
+    def equals(self, other: Table | pd.DataFrame) -> bool:
         """Check if the underlying data is equal to another table's data."""
-        if isinstance(other, DataFrame):
+        if isinstance(other, pd.DataFrame):
             return self._data.equals(other)
 
         if isinstance(other, Table):
