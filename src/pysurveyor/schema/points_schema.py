@@ -25,8 +25,6 @@ class PointsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["PointsSchema"])
     parse = ParserAccessor(SchemaParser["PointsSchema"])
 

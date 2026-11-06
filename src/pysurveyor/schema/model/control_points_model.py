@@ -19,7 +19,7 @@ def get_control_points_model_data() -> dict:
         "u_x": [
             False,
             DistanceUnit.METER,
-            IsNumeric() & GreaterOrEqual(0),
+            IsNumeric() & GreaterOrEqual(0, ignore=[None, COMMENT, -1]),
             "Uncertainty in X coordinate",
         ],
         # ------------------------------------------------------------------------------

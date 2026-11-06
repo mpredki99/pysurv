@@ -54,7 +54,10 @@ class Schema(Table[LoaderType]):
     ) -> None:
         """Initialize a schema from a tabular model."""
         super().__init__(model)
-        self.validation_mode = validation_mode
+
+        # ------------------------------------------------------------------------------
+        self._validation_mode: ValidationMode  # Declared for type checking
+        self.validation_mode = validation_mode  # Set via property setter
 
     # ==================================================================================
     # Properties
@@ -79,9 +82,11 @@ class Schema(Table[LoaderType]):
     def validation_mode(self, new_validation_mode: ValidationMode | str) -> None:
         """Set the validation mode, coercing strings to ``ValidationMode``."""
         if isinstance(new_validation_mode, ValidationMode):
-            self._validation_mode = new_validation_mode
+            mode = new_validation_mode
         else:
-            self._validation_mode = ValidationMode(new_validation_mode)
+            mode = ValidationMode(new_validation_mode)
+
+        object.__setattr__(self, "_validation_mode", mode)
 
     # ==================================================================================
     @property

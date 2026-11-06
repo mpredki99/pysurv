@@ -25,8 +25,6 @@ class StationsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["StationsSchema"])
     parse = ParserAccessor(SchemaParser["StationsSchema"])
 

@@ -113,6 +113,13 @@ def assert_valid_columns_values(
     # Validate column data type --------------------------------------------------------
     for col, dtype in expected_columns.items():
         # ------------------------------------------------------------------------------
+        if col == "required":
+            if [value for value in model[col] if isna(value)]:
+                raise ValueError(
+                    f"Column 'required' in {schema_name} cannot contain empty values."
+                )
+
+        # ------------------------------------------------------------------------------
         invalid_values = [
             value
             for value in model[col]

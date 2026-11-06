@@ -9,6 +9,9 @@ import pandas as pd
 import pytest
 
 
+# ======================================================================================
+# Write a temporary text file to the given path with the provided data.
+# ======================================================================================
 @pytest.fixture
 def tmp_text_file(tmp_path):
     """Create a temporary text file."""

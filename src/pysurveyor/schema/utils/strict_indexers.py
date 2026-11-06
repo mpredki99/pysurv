@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from pysurveyor.backend.backend import NA
 from pysurveyor.schema.utils.model_validation import assert_valid_model
 
 
@@ -48,8 +49,17 @@ class _StrictIndexer:
 
         # Copy the model to avoid modifying the original until validation passes -------
         candidate = schema._model.copy(deep=True)
+
+        # Get the underlying DataFrame indexer ------------------------------------------
         indexer = getattr(candidate, self._indexer_name)
-        indexer[key] = value
+
+        # Apply the assignment to the candidate model -----------------------------------
+        try:
+            indexer[key] = value
+        except TypeError:
+            # Defer dtype validation to the schema validator ---------------------------
+            candidate = candidate.astype(object)
+            getattr(candidate, self._indexer_name)[key] = value
 
         # ------------------------------------------------------------------------------
         assert_valid_model(
@@ -60,7 +70,7 @@ class _StrictIndexer:
         )
 
         # Commit only after every validation succeeds ----------------------------------
-        object.__setattr__(schema, "_model", candidate)
+        object.__setattr__(schema, "_data", candidate)
 
 
 # ======================================================================================

@@ -25,8 +25,6 @@ class InstrumentsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["InstrumentsSchema"])
     parse = ParserAccessor(SchemaParser["InstrumentsSchema"])
 

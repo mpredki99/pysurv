@@ -25,8 +25,6 @@ class TargetsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["TargetsSchema"])
     parse = ParserAccessor(SchemaParser["TargetsSchema"])
 

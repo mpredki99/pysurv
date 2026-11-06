@@ -89,15 +89,22 @@ def parse_unit(unit: str) -> Unit:
     -------
     Unit
         The corresponding ``Unit`` enumeration member.
+
+    Raises
+    ------
+    ValueError
+        If the unit string does not correspond to any known unit.
     """
     try:
         return DistanceUnit(unit)
     except ValueError:
         pass
 
+    # ----------------------------------------------------------------------------------
     try:
         return AngleUnit(unit)
     except ValueError:
         pass
 
+    # ----------------------------------------------------------------------------------
     raise ValueError(f"Unknown unit: {unit!r}")

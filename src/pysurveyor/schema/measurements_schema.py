@@ -25,8 +25,6 @@ class MeasurementsSchema(StrictSchema[SchemaLoader]):
     management.
     """
 
-    __pysurveyor_abstract__ = True
-
     load = LoaderAccessor(SchemaLoader["MeasurementsSchema"])
     parse = ParserAccessor(SchemaParser["MeasurementsSchema"])
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 from pysurveyor.abc.pysurveyor_abc import ABSTRACT_CLASS_ATTRIBUTE
-from pysurveyor.backend.backend import DataFrame, Index
+from pysurveyor.backend.backend import NA, DataFrame, Index
 from pysurveyor.basic.units import Unit
 from pysurveyor.schema.abc.schema import Schema
 from pysurveyor.schema.utils.model_validation import (
@@ -82,8 +82,12 @@ class StrictSchema(Schema[LoaderType]):
 
     # ==================================================================================
     def __setattr__(self, name: str, value: Any) -> None:
-        """Prevent attribute modification after initialization."""
-        if getattr(self, "_is_initialized", False):
+        """Prevent model attribute modification after initialization.
+
+        ``validation_mode`` remains mutable because it controls how the schema
+        validates data rather than changing the schema model itself.
+        """
+        if getattr(self, "_is_initialized", False) and name != "validation_mode":
             raise AttributeError(
                 f"'{type(self).__name__}' does not allow modifying attribute {name!r}."
             )
@@ -113,6 +117,8 @@ class StrictSchema(Schema[LoaderType]):
 
         # Copy the model to avoid modifying the original until validation passes -------
         candidate = self._model.copy(deep=True)
+
+        # Apply the assignment to the candidate model -----------------------------------
         candidate[key] = value
 
         # ------------------------------------------------------------------------------
@@ -124,7 +130,7 @@ class StrictSchema(Schema[LoaderType]):
         )
 
         # Commit only after every validation succeeds ----------------------------------
-        object.__setattr__(self, "_model", candidate)
+        object.__setattr__(self, "_data", candidate)
 
     # ==================================================================================
     # Override accesors to enforce strict validation

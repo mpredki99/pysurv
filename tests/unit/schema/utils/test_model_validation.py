@@ -203,9 +203,9 @@ def test_invalid_value_type_is_rejected(model_name, model, column, value):
         for row in model.index
     ],
 )
-@pytest.mark.parametrize("column", EXPECTED_COLUMNS)
+@pytest.mark.parametrize("column", ["unit", "validator", "description"])
 def test_empty_value_is_allowed(model_name, model, row, column):
-    """Validate that an empty value is allowed for any row and column."""
+    """Validate that empty metadata values are allowed for any row."""
 
     valid_model = model.copy()
     valid_model[column] = valid_model[column].astype(object)
@@ -216,3 +216,25 @@ def test_empty_value_is_allowed(model_name, model, row, column):
     # ----------------------------------------------------------------------------------
 
     assert pd.isna(validated.at[row, column])
+
+
+# ======================================================================================
+@pytest.mark.parametrize(
+    ("model_name", "model", "row"),
+    [
+        (model_name, model, row)
+        for model_name, model in MODEL_CASES.items()
+        for row in model.index
+    ],
+)
+def test_empty_required(model_name, model, row):
+    """Validate that the 'required' column cannot contain an empty value."""
+
+    invalid_model = model.copy()
+    invalid_model["required"] = invalid_model["required"].astype(object)
+    invalid_model.at[row, "required"] = pd.NA
+
+    # ----------------------------------------------------------------------------------
+
+    with pytest.raises(ValueError, match="required"):
+        validate_model(invalid_model, EXPECTED_COLUMNS, model.index, model_name)
