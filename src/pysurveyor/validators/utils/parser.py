@@ -321,7 +321,9 @@ class _Evaluator:
         def predicate(*values: Any) -> Any:
             if len(values) != len(names):
 
-                raise TypeError(
+                raise ParseError(
+                    "Incorrect number of arguments for lambda"
+                ) from TypeError(
                     f"Lambda expects {len(names)} argument(s), "
                     f"received {len(values)}"
                 )
@@ -382,7 +384,23 @@ class _Evaluator:
 # Public API
 # ======================================================================================
 def parse_validator(expression: str) -> Validator:
-    """Parse a string and return the corresponding Validator object."""
+    """Parse a string and return the corresponding Validator object.
+
+    Parameters
+    ----------
+    expression : str
+        The string to parse.
+
+    Returns
+    -------
+    Validator
+        The parsed Validator object.
+
+    Raises
+    ------
+    ParseError
+        If the string is invalid or cannot be parsed.
+    """
 
     # ----------------------------------------------------------------------------------
     if not isinstance(expression, str):
