@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pysurveyor.io.config.file_configs import CSVConfig
 from pysurveyor.io.source.abc.source import FileSource
@@ -18,4 +18,4 @@ from pysurveyor.io.source.abc.source import FileSource
 class CSVSource(FileSource[CSVConfig]):
     """Source containing a CSV file location and its :class:`CSVConfig`."""
 
-    pass
+    config: CSVConfig = field(default_factory=CSVConfig)
