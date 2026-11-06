@@ -115,7 +115,7 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
             raise ValueError("Schema model must have index named 'field'")
 
         # ------------------------------------------------------------------------------
-        parsed_header_fields = self._parse_header_fields(header)
+        parsed_header_fields = self.parse_header_fields(header)
 
         for field, required, unit, validator, description in parsed_header_fields:
 
@@ -129,7 +129,7 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
                 model.at[field, "unit"] = unit
 
             if validator is not None:
-                model.at[field, "validator"] = validator
+                model.at[field, "validator"] = validator  # type: ignore
 
             if description is not None:
                 model.at[field, "description"] = description
@@ -137,7 +137,7 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
         return schema
 
     # ==================================================================================
-    def _parse_header_fields(
+    def parse_header_fields(
         self, header: Iterable[str]
     ) -> Iterator[tuple[str, bool | None, Unit | None, Validator | None, str | None]]:
         """Parse header fields.
