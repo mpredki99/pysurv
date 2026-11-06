@@ -10,30 +10,33 @@ from pysurveyor.validators import Equal, Greater, GreaterOrEqual, Less, LessOrEq
 
 
 # ======================================================================================
-def test_threshold_as_float():
+@pytest.mark.parametrize(
+    ("validator_class"), [Equal, Greater, GreaterOrEqual, Less, LessOrEqual]
+)
+def test_threshold_as_float(validator_class):
     """Convert comparison thresholds to floats and validate assignments."""
-    greater = Greater(5)
-    assert greater.threshold == 5.0
+    validator = validator_class(5)
+    assert validator.threshold == 5.0
 
     # ----------------------------------------------------------------------------------
 
-    greater.threshold = 10
-    assert greater.threshold == 10.0
+    validator.threshold = 10
+    assert validator.threshold == 10.0
 
     # ----------------------------------------------------------------------------------
 
-    greater.threshold = "15"  # type: ignore
-    assert greater.threshold == 15.0
+    validator.threshold = "15"  # type: ignore
+    assert validator.threshold == 15.0
 
     # ----------------------------------------------------------------------------------
 
     with pytest.raises(ValueError):
-        greater.threshold = "non-numeric"  # type: ignore
+        validator.threshold = "non-numeric"  # type: ignore
 
     # ----------------------------------------------------------------------------------
 
     with pytest.raises(TypeError):
-        greater.threshold = None  # type: ignore
+        validator.threshold = None  # type: ignore
 
 
 # ======================================================================================
