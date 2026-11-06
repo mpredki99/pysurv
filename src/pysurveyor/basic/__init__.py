@@ -7,7 +7,7 @@
 
 from .basic import ang_subtract, azimuth, distance_3D, wrap_2pi, wrap_pi
 from .unit_converter import convert
-from .units import AngleUnit, DistanceUnit, parse_unit
+from .units import AngleUnit, DistanceUnit, Unit, parse_unit
 from .utils import as_array, as_scalar, is_scalar, normalize_numeric_type
 
 __all__ = [
@@ -21,6 +21,7 @@ __all__ = [
     "normalize_numeric_type",
     "wrap_2pi",
     "wrap_pi",
+    "Unit",
     "AngleUnit",
     "DistanceUnit",
     "parse_unit",
