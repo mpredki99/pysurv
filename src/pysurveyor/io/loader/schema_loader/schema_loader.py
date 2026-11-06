@@ -8,7 +8,7 @@ from __future__ import annotations
 from os import PathLike
 from pathlib import Path
 
-from pysurveyor.backend.backend import NA, Series, isna, read_csv
+from pysurveyor.backend.backend import NA, DataFrame, isna, read_csv
 from pysurveyor.basic.units import parse_unit
 from pysurveyor.io.cache.cache_keys import create_file_cache_key
 from pysurveyor.io.cache.loader_cache import LoaderCache
@@ -78,18 +78,29 @@ class SchemaLoader(TableLoader[SchemaType]):
         # ------------------------------------------------------------------------------
         # Parse units and validators in the schema model
         # ------------------------------------------------------------------------------
-        if "unit" in model.columns:
-            model["unit"] = model["unit"].map(
-                lambda u: parse_unit(u.strip()) if not isna(u) else NA
-            )
-
-        if "validator" in model.columns:
-            model["validator"] = model["validator"].map(
-                lambda v: parse_validator(v.strip()) if not isna(v) else NA
-            )
+        model = self._parse_model(model)
 
         # ------------------------------------------------------------------------------
         if validation_mode is None:
             return self._constructor(model)
 
         return self._constructor(model, validation_mode=validation_mode)
+
+    # ==================================================================================
+    # Private methods
+    # ==================================================================================
+    @staticmethod
+    def _parse_model(model: DataFrame) -> DataFrame:
+        """Parse the model fields to the appropriate data types."""
+        # ------------------------------------------------------------------------------
+        if "unit" in model.columns:
+            model["unit"] = model["unit"].map(
+                lambda u: parse_unit(u.strip()) if not isna(u) else NA
+            )
+        # ------------------------------------------------------------------------------
+        if "validator" in model.columns:
+            model["validator"] = model["validator"].map(
+                lambda v: parse_validator(v.strip()) if not isna(v) else NA
+            )
+        # ------------------------------------------------------------------------------
+        return model
