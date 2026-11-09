@@ -8,7 +8,8 @@ from __future__ import annotations
 from os import PathLike
 from pathlib import Path
 
-from pysurveyor.backend.backend import NA, DataFrame, isna, read_csv
+import pandas as pd
+
 from pysurveyor.basic.units import parse_unit
 from pysurveyor.io.cache.cache_keys import create_file_cache_key
 from pysurveyor.io.cache.loader_cache import LoaderCache
@@ -72,7 +73,7 @@ class SchemaLoader(TableLoader[SchemaType]):
 
         key = create_file_cache_key(path, config.kwargs)
         model = LoaderCache.current().get_data(
-            key, lambda: read_csv(path, **config.kwargs)
+            key, lambda: pd.read_csv(path, **config.kwargs)
         )
 
         # ------------------------------------------------------------------------------
@@ -90,17 +91,17 @@ class SchemaLoader(TableLoader[SchemaType]):
     # Private methods
     # ==================================================================================
     @staticmethod
-    def _parse_model(model: DataFrame) -> DataFrame:
+    def _parse_model(model: pd.DataFrame) -> pd.DataFrame:
         """Parse the model fields to the appropriate data types."""
         # ------------------------------------------------------------------------------
         if "unit" in model.columns:
             model["unit"] = model["unit"].map(
-                lambda u: parse_unit(u.strip()) if not isna(u) else NA
+                lambda u: parse_unit(u.strip()) if not pd.isna(u) else pd.NA
             )
         # ------------------------------------------------------------------------------
         if "validator" in model.columns:
             model["validator"] = model["validator"].map(
-                lambda v: parse_validator(v.strip()) if not isna(v) else NA
+                lambda v: parse_validator(v.strip()) if not pd.isna(v) else pd.NA
             )
         # ------------------------------------------------------------------------------
         return model

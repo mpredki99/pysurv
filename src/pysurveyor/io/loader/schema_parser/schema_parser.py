@@ -11,7 +11,8 @@ from pathlib import Path
 import re
 from typing import Any
 
-from pysurveyor.backend.backend import read_csv
+import pandas as pd
+
 from pysurveyor.basic.units import Unit, parse_unit
 from pysurveyor.io.config.abc.config import IOConfig
 from pysurveyor.io.config.file_configs import CSVConfig
@@ -87,7 +88,7 @@ class SchemaParser(ObjectBoundLoader[SchemaType]):
         read_kwargs = config.kwargs
         read_kwargs["nrows"] = 0
 
-        header = read_csv(path, **read_kwargs).columns.tolist()
+        header = pd.read_csv(path, **read_kwargs).columns.tolist()
 
         return self.parse_header(header)
 
