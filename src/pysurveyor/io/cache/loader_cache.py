@@ -9,12 +9,28 @@ from contextlib import AbstractContextManager
 from contextvars import ContextVar, Token
 from os import PathLike
 from pathlib import Path
-from types import TracebackType
-from typing import Callable, ClassVar, Hashable
+from types import MethodType, TracebackType
+from typing import Any, Callable, ClassVar, Hashable
 
 import pandas as pd
 
 from pysurveyor.io.cache.cache_keys import FileCacheKey
+
+
+# ======================================================================================
+# Cache method descriptor to bind cache operations to an instance or the current cache
+# ======================================================================================
+class _CacheMethod:
+    """Bind cache operations to an instance or the current shared cache."""
+
+    def __init__(self, function: Callable[..., Any]) -> None:
+        self._function = function
+
+    def __get__(
+        self, instance: LoaderCache | None, owner: type[LoaderCache]
+    ) -> MethodType:
+        cache = instance if instance is not None else owner.current()
+        return MethodType(self._function, cache)
 
 
 # ======================================================================================
@@ -77,6 +93,7 @@ class LoaderCache:
     # ==================================================================================
     # Public methods
     # ==================================================================================
+    @_CacheMethod
     def get_data(
         self,
         key: Hashable,
@@ -114,16 +131,19 @@ class LoaderCache:
         return data.copy() if copy else data
 
     # ==================================================================================
+    @_CacheMethod
     def clear(self) -> None:
         """Remove all cached data."""
         self._cached_data.clear()
 
     # ==================================================================================
+    @_CacheMethod
     def remove(self, key: Hashable) -> None:
         """Remove one cache entry by key."""
         self._cached_data.pop(key, None)
 
     # ==================================================================================
+    @_CacheMethod
     def remove_file(self, path: PathLike[str] | str) -> None:
         """Remove all file-cache entries associated with ``path``."""
         resolved_path = str(Path(path).expanduser().resolve())
